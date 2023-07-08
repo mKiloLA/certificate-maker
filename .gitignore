@@ -1,0 +1,5 @@
+/references/*.csv
+/references/*.xlsx
+/.venv
+/.vscode
+/src/__pycache__
