@@ -1,5 +1,5 @@
 from datetime import timedelta
-from .ref import states_abbrev, states_full, states_dict
+from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
 import re
 
 class Attorney:
