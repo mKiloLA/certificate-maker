@@ -2,6 +2,7 @@ from datetime import timedelta
 from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
 import re
 
+
 class Attorney:
     """Class to represent an attorney attending a CLE."""
 
@@ -67,7 +68,10 @@ class Attorney:
 
     def parse_states(self):
         """Split the states in the state attribute."""
-        if self.__states.capitalize().strip() in states_full or self.__states.upper().strip() in states_abbrev:
+        if (
+            self.__states.capitalize().strip() in states_full
+            or self.__states.upper().strip() in states_abbrev
+        ):
             split_states = [self.__states]
         elif "," in self.__states:
             split_states = [x.strip() for x in self.__states.split(",")]
@@ -81,16 +85,23 @@ class Attorney:
             split_states = [x.strip() for x in self.__states.split("/")]
         else:
             split_states = []
-        self.__states = [states_dict[x.upper()] if x.upper() in states_abbrev else x.capitalize().strip() for x in split_states]
+        self.__states = [
+            states_dict[x.upper()]
+            if x.upper() in states_abbrev
+            else x.capitalize().strip()
+            for x in split_states
+        ]
 
     def parse_bar_numbers(self):
         """Split the bar numbers into a list."""
-        self.__bar_numbers = self.__bar_numbers.replace("#","")
+        self.__bar_numbers = self.__bar_numbers.replace("#", "")
         if self.__bar_numbers.isdigit():
             self.__bar_numbers = [self.__bar_numbers.strip()]
             return
         elif len(self.__bar_numbers) > 0:
-            split_bar_numbers = [x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)]
+            split_bar_numbers = [
+                x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)
+            ]
         else:
             split_bar_numbers = []
 
@@ -171,7 +182,11 @@ class Attorney:
         """Makes sure time is not counted during breaks."""
         for break_period in breaks:
             for index, period in enumerate(self.__times):
-                if period[0] < break_period[0] and period[1] < break_period[1] and period[1] > break_period[0]:
+                if (
+                    period[0] < break_period[0]
+                    and period[1] < break_period[1]
+                    and period[1] > break_period[0]
+                ):
                     self.__times[index][1] = break_period[0]
                 elif period[0] < break_period[1] and period[0] > break_period[0]:
                     self.__times[index][0] = break_period[1]
