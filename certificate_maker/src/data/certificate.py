@@ -21,10 +21,10 @@ def create_certificates(zoom_file, webinar_file):
             for name in og_name_list:
                 if total_length + len(name) >= 40:
                     overflow_name_list.append(name)
-                    total_length+=len(name)
+                    total_length += len(name)
                 else:
                     first_name_list.append(name)
-                    total_length+=len(name)
+                    total_length += len(name)
             name_1 = " ".join(first_name_list)
             name_2 = " ".join(overflow_name_list)
             certificate_data = {
@@ -43,19 +43,29 @@ def create_certificates(zoom_file, webinar_file):
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
             }
+            import os
+            import sys
 
-            reader = PdfReader("references/certificate_form_empty.pdf")
+            # bundle_dir = getattr(
+            #     sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__))
+            # )
+            # path_to_form = os.path.abspath(
+            #     os.path.join(bundle_dir, "references/certificate_form_empty.pdf")
+            # )
+            path_to_form = "references/certificate_form_empty.pdf"
+            reader = PdfReader(path_to_form)
             writer = PdfWriter()
             fields = reader.get_fields()
             writer.append(reader)
-            writer.update_page_form_field_values(writer.get_page(0), certificate_data, 1)
+            writer.update_page_form_field_values(
+                writer.get_page(0), certificate_data, 1
+            )
 
             # write "output" to pypdf-output.pdf
             os.makedirs("output-certificates", exist_ok=True)
-            with open(
-                "output-certificates/{}-{}-{}.pdf".format(
-                    person.name.replace(" ", "_"), state, person.email
-                ),
+            with open("output-certificates/{}-{}-{}.pdf".format(
+                        person.name.replace(" ", "_"), state, person.email
+                    ),
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)

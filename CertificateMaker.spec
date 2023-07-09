@@ -8,7 +8,7 @@ a = Analysis(
     ['certificate_maker/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[("references/certificate_form_empty.pdf", "references/"), ("output-certificates/", ".")],
+    datas=[("references/certificate_form_empty.pdf", "references"), ("output-certificates/", ".")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

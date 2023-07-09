@@ -1,6 +1,7 @@
 from openpyxl import load_workbook
 from certificate_maker.src.data.ref import states_dict, new_york_approvals
 
+
 class CleClass:
     """Class to represent one class that an attorney can attend."""
 
@@ -35,7 +36,7 @@ class CleClass:
 
     def get_approvals(self, cle_master_list_path):
         """Get all approved instances of the class."""
-        wb = load_workbook(filename = cle_master_list_path)
+        wb = load_workbook(filename=cle_master_list_path)
         for sheet in wb:
             for row in sheet.values:
                 if row[2] == self.cle_name and row[3].date() == self.cle_date:
@@ -53,7 +54,6 @@ class CleClass:
 
     def __parse_credit_type(self):
         """Split the types of credit into readable format."""
-        print(self.approvals)
         for key in self.approvals:
             total_hours = 0
             parsed_credits = []
@@ -65,4 +65,8 @@ class CleClass:
                     total_hours = hour[:-1]
                 else:
                     parsed_credits.append(hour)
-            self.approvals[key] = [course_number, total_hours, ", ".join(parsed_credits)]
+            self.approvals[key] = [
+                course_number,
+                total_hours,
+                ", ".join(parsed_credits),
+            ]
