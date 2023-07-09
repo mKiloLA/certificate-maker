@@ -2,8 +2,8 @@ from datetime import datetime
 import pandas as pd
 import csv
 
-from .attorney import Attorney
-from .cle_class import CleClass
+from certificate_maker.src.data.attorney import Attorney
+from certificate_maker.src.data.cle_class import CleClass
 
 
 class Webinar:

@@ -1,5 +1,8 @@
 /references/*.csv
 /references/*.xlsx
+/output-certificates/*
 /.venv
 /.vscode
-/src/__pycache__
+/certificate_maker/src/gui/__pycache__
+/certificate_maker/src/data/__pycache__
+/certificate_maker/__pycache__
