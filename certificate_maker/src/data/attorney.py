@@ -81,7 +81,7 @@ class Attorney:
             split_states = [x.strip() for x in self.__states.split("/")]
         else:
             split_states = []
-        self.__states = [states_dict[x.upper()] if x.upper() in states_abbrev else x.capitalize() for x in split_states]
+        self.__states = [states_dict[x.upper()] if x.upper() in states_abbrev else x.capitalize().strip() for x in split_states]
 
     def parse_bar_numbers(self):
         """Split the bar numbers into a list."""
@@ -97,9 +97,9 @@ class Attorney:
         temp = []
         for entry in split_bar_numbers:
             if entry.isdigit():
-                temp.append(entry)
+                temp.append(entry.strip())
             elif "-" in entry:
-                temp.append(entry)
+                temp.append(entry.strip())
 
         self.bar_numbers = temp
 

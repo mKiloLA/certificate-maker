@@ -6,6 +6,10 @@ Version: 0.1
 import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import ImageTk, Image
+from threading import Thread, Event
+from time import sleep
+
+from certificate_maker.src.data.certificate import create_certificates
 
 
 class TabPanel(tk.Frame):
@@ -78,8 +82,8 @@ class TabPanel(tk.Frame):
         create_tab.grid_rowconfigure(1, weight=1)
         create_tab.grid_rowconfigure(2, weight=1)
 
-        create_tab.grid_columnconfigure(0, weight=1)
-        create_tab.grid_columnconfigure(1, weight=4)
+        create_tab.grid_columnconfigure(0, weight=1, minsize=150)
+        create_tab.grid_columnconfigure(1, weight=4, minsize=650)
 
         zoom_file = tk.Button(
             create_tab,
@@ -87,8 +91,10 @@ class TabPanel(tk.Frame):
             text="Browse for Zoom File",
             command=lambda: self.action_performed('zoom'),
             bg="light gray",
+            height = 5,
+            width = 20,
         )
-        zoom_file.grid(row=0, column=0, padx=2, pady=30, sticky='NSEW')
+        zoom_file.grid(row=0, column=0, padx=2, pady=2)
 
         self.zoom_label = tk.Label(
             master=create_tab,
@@ -103,8 +109,10 @@ class TabPanel(tk.Frame):
             text="Browse for webinar File",
             command=lambda: self.action_performed('webinar'),
             bg="light gray",
+            height = 5,
+            width = 20,
         )
-        webinar_file.grid(row=1, column=0, padx=2, pady=30, sticky='NSEW')
+        webinar_file.grid(row=1, column=0, padx=2, pady=2)
 
         self.webinar_label = tk.Label(
             master=create_tab,
@@ -119,8 +127,16 @@ class TabPanel(tk.Frame):
             text="Submit Files",
             command=lambda: self.action_performed('submit'),
             bg="gray",
+            height = 5,
+            width = 90,
         )
-        submit.grid(row=2, columnspan=2, padx=2, pady=30, sticky='NSEW')
+        submit.grid(row=2, columnspan=2, padx=2, pady=2)
+
+        self.progress_bar = ttk.Progressbar(
+            create_tab,
+            orient='horizontal',
+            mode="determinate",
+        )
 
         # ----- Create the Email Tab -----
         email_tab.grid_rowconfigure(0, weight=1)
@@ -170,7 +186,16 @@ class TabPanel(tk.Frame):
             self.__webinar_file = self.browse_for_file("Browse for webinar.xlsx file")
             self.webinar_label.configure(text="{} selected.".format(self.__webinar_file))
         elif text == 'submit':
-            print("submit")
+            if self.__zoom_file is not None and self.__webinar_file is not None:
+                self.stop_event = Event()
+                thread_pb = Thread(target=self.progress_bar_callback)
+                thread = Thread(target=self.callback)
+                thread_pb.start()
+                thread.start()
+            if self.__zoom_file is None:
+                self.zoom_label.configure(text="You must select a file!")
+            if self.__webinar_file is None:
+                self.webinar_label.configure(text="You must select a file!")
         else:
             pass
 
@@ -178,3 +203,29 @@ class TabPanel(tk.Frame):
         return filedialog.askopenfilename(
             title=title,
         )
+    
+    def callback(self):
+        print("callback")
+        create_certificates(self.__zoom_file, self.__webinar_file)
+        self.stop_event.set()
+
+    def progress_bar_callback(self):
+        print("progress bar callback")
+        self.progress_bar.grid(row=3, columnspan=2, padx=2, pady=2, sticky='EW')
+        self.progress_bar.start()
+        counter = 0
+        while not self.stop_event.is_set():
+            self.progress_bar.step(0.05)
+            counter+=0.05
+        while counter < 50:
+            self.progress_bar.step(.1)
+            counter+=0.1
+        self.progress_bar.stop()
+        self.progress_bar.grid_remove()
+        self.reset_labels()
+
+    def reset_labels(self):
+        self.__webinar_file = None
+        self.__zoom_file = None
+        self.webinar_label.configure(text="No File Selected.")
+        self.zoom_label.configure(text="No File Selected.")
