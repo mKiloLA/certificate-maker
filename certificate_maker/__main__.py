@@ -6,6 +6,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # main()
-    create_certificates(r"C:\Python\certificate-maker\references\zoom_attendence.csv", r"C:\Python\certificate-maker\references\master_webinar_list.xlsx")
+    main()
+    # create_certificates(r"/Users/wendioster/Documents/Comedian of Law/playground/certificate-maker/references/zoom_attendence.csv", r"/Users/wendioster/Documents/Comedian of Law/playground/certificate-maker/references/master_webinar_list.xlsx")
     

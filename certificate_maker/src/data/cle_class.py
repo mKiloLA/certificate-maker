@@ -63,22 +63,6 @@ class CleClass:
             for index, hour in enumerate(credit_list):
                 if "T" in hour:
                     total_hours = hour[:-1]
-                elif "SAC" in hour:
-                    parsed_credits.append("{}h substance abuse and competency".format(hour[:-3]))
-                elif "EOB" in hour:
-                    parsed_credits.append("{}h elimination of bias".format(hour[:-3]))
-                elif "SA" in hour:
-                    parsed_credits.append("{}h substance abuse".format(hour[:-2]))
-                elif "E" in hour:
-                    parsed_credits.append("{}h ethics".format(hour[:-1]))
-                elif "G" in hour:
-                    parsed_credits.append("{}h general".format(hour[:-1]))
-                elif "D" in hour:
-                    parsed_credits.append("{}h diversity".format(hour[:-1]))
-                elif "C" in hour:
-                    parsed_credits.append("{}h competency".format(hour[:-1]))
-                elif "P" in hour:
-                    parsed_credits.append("{}h professionalism".format(hour[:-1]))
                 else:
-                    parsed_credits.append("Not approved for credit.")
+                    parsed_credits.append(hour)
             self.approvals[key] = [course_number, total_hours, ", ".join(parsed_credits)]

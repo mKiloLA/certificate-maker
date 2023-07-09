@@ -70,13 +70,13 @@ class TabPanel(tk.Frame):
         )
         text1.grid(row=0, column=0, padx=2, pady=2, sticky="NW")
 
-        image1 = Image.open("certificate_maker/src/static/sample_excel.png")
-        width, height = image1.size
-        image1 = image1.resize((width // 3, height // 3))
-        sample_excel_image = ImageTk.PhotoImage(image1)
-        sample_problem = tk.Label(master=instructions_tab, image=sample_excel_image)
-        sample_problem.image = sample_excel_image
-        sample_problem.grid(row=1, column=0, padx=2, pady=2, sticky="NSEW")
+        # image1 = Image.open("certificate_maker/src/static/sample_excel.png")
+        # width, height = image1.size
+        # image1 = image1.resize((width // 3, height // 3))
+        # sample_excel_image = ImageTk.PhotoImage(image1)
+        # sample_problem = tk.Label(master=instructions_tab, image=sample_excel_image)
+        # sample_problem.image = sample_excel_image
+        # sample_problem.grid(row=1, column=0, padx=2, pady=2, sticky="NSEW")
 
         # ----- Create the Create Tab -----
         create_tab.grid_rowconfigure(0, weight=1)
@@ -211,12 +211,10 @@ class TabPanel(tk.Frame):
         )
 
     def callback(self):
-        print("callback")
         create_certificates(self.__zoom_file, self.__webinar_file)
         self.stop_event.set()
 
     def progress_bar_callback(self):
-        print("progress bar callback")
         self.progress_bar.grid(row=3, columnspan=2, padx=2, pady=2, sticky="EW")
         self.progress_bar.start()
         counter = 0
