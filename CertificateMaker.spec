@@ -5,10 +5,10 @@ block_cipher = None
 
 
 a = Analysis(
-    ['certificate_maker\\__main__.py'],
+    ['certificate_maker/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[("references/certificate_form_empty.pdf", "references/")],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -31,7 +31,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -47,4 +47,10 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='CertificateMaker',
+)
+app = BUNDLE(
+    coll,
+    name='CertificateMaker.app',
+    icon=None,
+    bundle_identifier=None,
 )
