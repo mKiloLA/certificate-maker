@@ -1,6 +1,7 @@
 from datetime import timedelta
 from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
 import re
+import logging
 
 
 class Attorney:
@@ -73,18 +74,25 @@ class Attorney:
             or self.__states.upper().strip() in states_abbrev
         ):
             split_states = [self.__states]
-        elif "," in self.__states:
-            split_states = [x.strip() for x in self.__states.split(",")]
-        elif "&" in self.__states:
-            split_states = [x.strip() for x in self.__states.split("&")]
-        elif ";" in self.__states:
-            split_states = [x.strip() for x in self.__states.split(";")]
-        elif "and" in self.__states:
-            split_states = [x.strip() for x in self.__states.split("and")]
-        elif "/" in self.__states:
-            split_states = [x.strip() for x in self.__states.split("/")]
         else:
-            split_states = []
+            logging.info("Check State: `{}` has multiple states.".format(self.name))
+            if "," in self.__states:
+                split_states = [x.strip() for x in self.__states.split(",")]
+            elif "&" in self.__states:
+                split_states = [x.strip() for x in self.__states.split("&")]
+            elif ";" in self.__states:
+                split_states = [x.strip() for x in self.__states.split(";")]
+            elif "and" in self.__states:
+                split_states = [x.strip() for x in self.__states.split("and")]
+            elif "/" in self.__states:
+                split_states = [x.strip() for x in self.__states.split("/")]
+            else:
+                logging.error(
+                    "Check State: `{}` has no state listed or an unrecognized format.".format(
+                        self.name
+                    )
+                )
+                split_states = []
         self.__states = [
             states_dict[x.upper()]
             if x.upper() in states_abbrev
@@ -99,10 +107,16 @@ class Attorney:
             self.__bar_numbers = [self.__bar_numbers.strip()]
             return
         elif len(self.__bar_numbers) > 0:
+            logging.info(
+                "Check Bar Number: `{}` has multiple bar numbers.".format(self.name)
+            )
             split_bar_numbers = [
                 x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)
             ]
         else:
+            logging.error(
+                "Check Bar Number: `{}` has no bar number listed.".format(self.name)
+            )
             split_bar_numbers = []
 
         temp = []
@@ -123,7 +137,7 @@ class Attorney:
         # if start time is after and end time is after, move on to the next one
         # check if next time started before end of previous and ended after
         # check that next item is not inside of previous item
-        for _ in range(10):
+        for _ in range(12):
             remove_list = []
             keep_list = []
             if len((self.__times)) == 0:
@@ -195,7 +209,7 @@ class Attorney:
                     self.__times.append([break_period[1], period[1]])
 
     def remove_dead_time(self):
-        """Remove time intervals that empty."""
+        """Remove time intervals that are empty."""
         for period in self.__times:
             if period[1] - period[0] < timedelta(minutes=1):
                 self.__times.remove(period)

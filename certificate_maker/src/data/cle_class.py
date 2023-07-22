@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from certificate_maker.src.data.ref import states_dict, new_york_approvals
+import logging
 
 
 class CleClass:
@@ -70,3 +71,9 @@ class CleClass:
                 total_hours,
                 ", ".join(parsed_credits),
             ]
+            if total_hours == 0:
+                logging.error(
+                    "Check Master CLE List: CLE list is missing total hours in `{}`.".format(
+                        key
+                    )
+                )

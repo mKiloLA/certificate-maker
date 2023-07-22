@@ -1,5 +1,14 @@
 from certificate_maker.src.gui.primary_window import PrimaryWindow
-from certificate_maker.src.data.certificate import create_certificates
+import logging
+
+logging.basicConfig(
+    filemode="w",
+    filename="CertificatesToCheck.log",
+    encoding="utf-8",
+    level=logging.INFO,
+    format="%(levelname)s:%(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -8,4 +17,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    # create_certificates(r"/Users/wendioster/Documents/Comedian of Law/playground/certificate-maker/references/zoom_attendence.csv", r"/Users/wendioster/Documents/Comedian of Law/playground/certificate-maker/references/master_webinar_list.xlsx")

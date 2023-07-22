@@ -1,9 +1,9 @@
 import os
 from pypdf import PdfReader, PdfWriter
 from certificate_maker.src.data.webinar import Webinar
-from certificate_maker.src.data.ref import states_dict
+import logging
 
-from datetime import datetime, date
+from datetime import date
 
 
 def create_certificates(zoom_file, webinar_file):
@@ -13,6 +13,11 @@ def create_certificates(zoom_file, webinar_file):
             try:
                 approval_information = webinar.cle_class.approvals[state]
             except:
+                logging.error(
+                    "Check State Approvals: `{}` has no approval infomation in the state of `{}`.".format(
+                        person.name, state
+                    )
+                )
                 approval_information = ["N/A", "N/A", "N/A"]
             og_name_list = webinar.cle_class.cle_name.split(" ")
             first_name_list = []
@@ -31,9 +36,7 @@ def create_certificates(zoom_file, webinar_file):
                 "name": person.name,
                 "state": state,
                 "barnumber": "#{}".format(person.bar_numbers[index]),
-                "attendedhours": "{:.2f}".format(
-                    person.total_time.total_seconds() / 3600
-                ),
+                "attendedhours": round_hours(person.total_time, state),
                 "cledate": webinar.cle_class.cle_date.strftime("%B %d, %Y"),
                 "totalhours": approval_information[1],
                 "coursenumber": "#{}".format(approval_information[0]),
@@ -43,16 +46,8 @@ def create_certificates(zoom_file, webinar_file):
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
             }
-            import os
-            import sys
 
-            # bundle_dir = getattr(
-            #     sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__))
-            # )
-            # path_to_form = os.path.abspath(
-            #     os.path.join(bundle_dir, "references/certificate_form_empty.pdf")
-            # )
-            path_to_form = "references/certificate_form_empty.pdf"
+            path_to_form = os.path.join(os.getcwd(), "references/certificate_form_empty.pdf")
             reader = PdfReader(path_to_form)
             writer = PdfWriter()
             fields = reader.get_fields()
@@ -63,9 +58,43 @@ def create_certificates(zoom_file, webinar_file):
 
             # write "output" to pypdf-output.pdf
             os.makedirs("output-certificates", exist_ok=True)
-            with open("output-certificates/{}-{}-{}.pdf".format(
-                        person.name.replace(" ", "_"), state, person.email
-                    ),
+            with open(
+                "output-certificates/{}-{}-{}.pdf".format(
+                    person.name.replace(" ", "_"), state, person.email
+                ),
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)
+
+
+def round_hours(total_time, state):
+    """Round the attended hours according to state guidelines."""
+    seconds = total_time.total_seconds()
+    if state in ["Missouri"]:
+        return "{:.2f}".format((seconds / 3000))
+    elif state in ["Indiana"]:
+        return "{:.1f}".format((seconds / 3600))
+    elif state in ["Pennsylvania"]:
+        hours = seconds // 3600
+        remainder = (seconds / 60) % 60
+        if remainder < 15:
+            remainder = 0
+        elif 15 <= remainder and remainder < 45:
+            remainder = 5
+        else:
+            remainder = 0
+            hours += 1
+        return "{:.0f}.{:.0f}".format(hours, remainder)
+    elif state in ["Kansas", "Florida"]:
+        hours = seconds // 3000
+        remainder = (seconds / 60) % 50
+        if remainder < 25:
+            remainder = 0
+        elif 25 <= remainder and remainder < 50:
+            remainder = 5
+        else:
+            remainder = 0
+            hours += 1
+        return "{:.0f}.{:.0f}".format(hours, remainder)
+    else:
+        return "{:.2f}".format((seconds / 3600))
