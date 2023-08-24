@@ -173,5 +173,13 @@ def string_to_datetime(time):
             try:
                 time = datetime.strptime(time, "%b %d, %Y %H:%M")
             except:
-                time = datetime.strptime(time, "%m/%d/%Y %H:%M %p")
+                try:
+                    time = datetime.strptime(time, "%m/%d/%Y %H:%M %p")
+                except:
+                    try:
+                        time = datetime.strptime(time, "%m/%d/%y %H:%M %p")
+                    except:
+                        time = datetime.strptime(time, "%m/%d/%y %H:%M")
+
+
     return time.replace(second=0, microsecond=0)
