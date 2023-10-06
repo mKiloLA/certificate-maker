@@ -102,7 +102,6 @@ class Webinar:
                 if check_next_line:
                     cle_name = line[0]
                     cle_date = string_to_datetime(line[2]).date()
-
                     check_next_line = False
                 elif len(line) > 0 and line[0] == "Topic":
                     check_next_line = True

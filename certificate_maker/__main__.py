@@ -1,4 +1,5 @@
 from certificate_maker.src.gui.primary_window import PrimaryWindow
+# from certificate_maker.src.data.certificate import create_certificates
 import logging
 
 logging.basicConfig(
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    # create_certificates(zoom, master)
     PrimaryWindow().mainloop()
 
 

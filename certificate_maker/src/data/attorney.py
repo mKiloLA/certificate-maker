@@ -102,7 +102,9 @@ class Attorney:
 
     def parse_bar_numbers(self):
         """Split the bar numbers into a list."""
+        print(f"{self.__name}: {self.__bar_numbers}")
         self.__bar_numbers = self.__bar_numbers.replace("#", "")
+        self.__bar_numbers = self.__bar_numbers.replace(".0", "")
         if self.__bar_numbers.isdigit():
             self.__bar_numbers = [self.__bar_numbers.strip()]
             return
@@ -118,14 +120,14 @@ class Attorney:
                 "Check Bar Number: `{}` has no bar number listed.".format(self.name)
             )
             split_bar_numbers = []
-
+        print(f"{self.__name}: {split_bar_numbers}")
         temp = []
         for entry in split_bar_numbers:
             if entry.isdigit():
                 temp.append(entry.strip())
             elif "-" in entry:
                 temp.append(entry.strip())
-
+        print(f"{self.__name}: {temp}")
         self.bar_numbers = temp
 
     def get_total_time(self):
