@@ -36,7 +36,7 @@ def create_certificates(zoom_file, webinar_file):
                 "name": person.name,
                 "state": state,
                 "barnumber": "#{}".format(person.bar_numbers[index]),
-                "attendedhours": round_hours(person.total_time, state),
+                "attendedhours": "{:.2f}".format(float(round_hours(person.total_time, state)) if float(round_hours(person.total_time, state)) < float(approval_information[1]) else float(approval_information[1])),
                 "cledate": webinar.cle_class.cle_date.strftime("%B %d, %Y"),
                 "totalhours": approval_information[1],
                 "coursenumber": "#{}".format(approval_information[0]),
@@ -47,7 +47,7 @@ def create_certificates(zoom_file, webinar_file):
                 "overflow": name_2 if len(name_2) > 0 else "",
             }
 
-            path_to_form = os.path.join(os.getcwd(), "references/certificate_form_empty.pdf")
+            path_to_form = os.path.join(os.getcwd(), "Certificates/References/certificate_form_empty.pdf")
             reader = PdfReader(path_to_form)
             writer = PdfWriter()
             fields = reader.get_fields()
@@ -57,9 +57,9 @@ def create_certificates(zoom_file, webinar_file):
             )
 
             # write "output" to pypdf-output.pdf
-            os.makedirs("output-certificates", exist_ok=True)
+            os.makedirs("Certificates/Output Certificates", exist_ok=True)
             with open(
-                "output-certificates/{}-{}-{}.pdf".format(
+                "Certificates/Output Certificates/{}-{}-{}.pdf".format(
                     person.name.replace(" ", "_"), state, person.email
                 ),
                 "wb",
