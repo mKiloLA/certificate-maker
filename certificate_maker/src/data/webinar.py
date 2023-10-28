@@ -102,7 +102,6 @@ class Webinar:
                 if check_next_line:
                     cle_name = line[0]
                     cle_date = string_to_datetime(line[2]).date()
-
                     check_next_line = False
                 elif len(line) > 0 and line[0] == "Topic":
                     check_next_line = True
@@ -119,14 +118,14 @@ class Webinar:
                 elif len(line) > 0 and line[0] == "Attendee Details":
                     rows_to_skip = i + 1
                     break
-        zoom_data = pd.read_csv(
-            zoom_file_path, skiprows=rows_to_skip, index_col=False
-        )
+        zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
         zoom_data["Name"] = zoom_data["First Name"] + " " + zoom_data["Last Name"]
 
         try:
             cut_off = zoom_data.iloc[
-                zoom_data[zoom_data["Attended"] == "Other Attended"].index.to_list()[0] :
+                zoom_data[zoom_data["Attended"] == "Other Attended"].index.to_list()[
+                    0
+                ] :
             ].index.to_list()
             zoom_data.drop(cut_off, inplace=True)
         except:
@@ -158,7 +157,7 @@ class Webinar:
             person.remove_dead_time()
             person.parse_bar_numbers()
             person.parse_states()
-        
+
         self.cle_class = CleClass(cle_name, cle_date)
         self.cle_class.get_approvals(cle_master_list_path)
 
@@ -173,5 +172,22 @@ def string_to_datetime(time):
             try:
                 time = datetime.strptime(time, "%b %d, %Y %H:%M")
             except:
-                time = datetime.strptime(time, "%m/%d/%Y %M:%M %p")
+                try:
+                    time = datetime.strptime(time, "%m/%d/%Y %H:%M %p")
+                except:
+                    try:
+                        time = datetime.strptime(time, "%m/%d/%Y %I:%M %p")
+                    except:
+                        try:
+                            time = datetime.strptime(time, "%m/%d/%y %H:%M %p")
+                        except:
+                            try:
+                                time = datetime.strptime(time, "%m/%d/%y %H:%M")
+                            except:
+                                try:
+                                    time = datetime.strptime(time, "%b %d, %Y %H:%M:%S")
+                                except:
+                                    time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
+
+
     return time.replace(second=0, microsecond=0)

@@ -2,8 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from certificate_maker.src.gui.tab_panel import TabPanel
 
+
 class PrimaryWindow(tk.Tk):
     """Class to represent the main window."""
+
     def __init__(self) -> None:
         """Constructor to initialize the window.
 
@@ -47,4 +49,4 @@ class PrimaryWindow(tk.Tk):
         if self.__main is not None:
             self.__main.destroy()
         self.__main = panel
-        self.__main.grid(row=0, column=0, padx=10, pady=10, sticky='NSEW')
+        self.__main.grid(row=0, column=0, padx=10, pady=10, sticky="NSEW")

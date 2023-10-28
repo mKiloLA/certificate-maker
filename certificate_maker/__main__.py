@@ -1,25 +1,21 @@
-from pypdf import PdfReader, PdfWriter
-from certificate_maker.src.data.webinar import Webinar
-
 from certificate_maker.src.gui.primary_window import PrimaryWindow
+# from certificate_maker.src.data.certificate import create_certificates
+import logging
 
-from datetime import datetime, date
-from certificate_maker.src.data.ref import states_dict
+logging.basicConfig(
+    filemode="w",
+    filename="Certificates/CertificatesToCheck.log",
+    encoding="utf-8",
+    level=logging.INFO,
+    format="%(levelname)s:%(message)s",
+)
+logger = logging.getLogger(__name__)
+
 
 def main() -> None:
-    """Main Function.
-
-    Main routine that is called when program begins.
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
+    # create_certificates("zoom", "master")
     PrimaryWindow().mainloop()
 
 
 if __name__ == "__main__":
     main()
-    

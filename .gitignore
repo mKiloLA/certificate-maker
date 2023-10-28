@@ -1,8 +1,10 @@
-/references/*.csv
-/references/*.xlsx
+*.csv
+*.xlsx
+*.log
 /output-certificates/*
 /.venv
 /.vscode
-/certificate_maker/src/gui/__pycache__
-/certificate_maker/src/data/__pycache__
-/certificate_maker/__pycache__
+__pycache__
+/build
+/dist
+.pylintrc
