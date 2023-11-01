@@ -1,6 +1,8 @@
 from datetime import datetime
 import pandas as pd
 import csv
+import logging
+import sys
 
 from certificate_maker.src.data.attorney import Attorney
 from certificate_maker.src.data.cle_class import CleClass
@@ -187,7 +189,9 @@ def string_to_datetime(time):
                                 try:
                                     time = datetime.strptime(time, "%b %d, %Y %H:%M:%S")
                                 except:
-                                    time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
-
-
+                                    try:
+                                        time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
+                                    except:
+                                        logging.error(f"Failed to parse time information for `{time}`.")
+                                        sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
     return time.replace(second=0, microsecond=0)

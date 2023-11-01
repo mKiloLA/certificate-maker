@@ -2,13 +2,14 @@ import os
 from pypdf import PdfReader, PdfWriter
 from certificate_maker.src.data.webinar import Webinar
 import logging
-
+import sys
 from datetime import date
 
 
 def create_certificates(zoom_file, webinar_file):
     webinar = Webinar(zoom_file, webinar_file)
     for person in webinar.attendees:
+        print(person.states)
         for index, state in enumerate(person.states):
             try:
                 approval_information = webinar.cle_class.approvals[state]
@@ -18,7 +19,7 @@ def create_certificates(zoom_file, webinar_file):
                         person.name, state
                     )
                 )
-                approval_information = ["N/A", "N/A", "N/A"]
+                sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
             og_name_list = webinar.cle_class.cle_name.split(" ")
             first_name_list = []
             overflow_name_list = []

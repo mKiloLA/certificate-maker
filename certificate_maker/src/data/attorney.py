@@ -2,6 +2,7 @@ from datetime import timedelta
 from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
 import re
 import logging
+import sys
 
 
 class Attorney:
@@ -92,6 +93,7 @@ class Attorney:
                         self.name
                     )
                 )
+                sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
                 split_states = []
         self.__states = [
             states_dict[x.upper()]
@@ -118,6 +120,7 @@ class Attorney:
             logging.error(
                 "Check Bar Number: `{}` has no bar number listed.".format(self.name)
             )
+            sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
             split_bar_numbers = []
         temp = []
         for entry in split_bar_numbers:

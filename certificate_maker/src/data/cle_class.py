@@ -1,7 +1,7 @@
 from openpyxl import load_workbook
 from certificate_maker.src.data.ref import states_dict, new_york_approvals
 import logging
-
+import sys
 
 class CleClass:
     """Class to represent one class that an attorney can attend."""
@@ -42,16 +42,20 @@ class CleClass:
             for row in sheet.values:
                 if row[2] == self.cle_name and row[3].date() == self.cle_date:
                     self.approvals[states_dict[sheet.title[0:2]]] = [row[6], row[9]]
-        self.__approved_jurisdictions()
-        self.__parse_credit_type()
+        if self.__approvals:
+            self.__approved_jurisdictions()
+            self.__parse_credit_type()
+        else:
+            logging.error(f"There are no CLEs matching `{self.cle_name}`. Please make sure the webinar has the correct title.")
+            sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
 
     def __approved_jurisdictions(self):
         """Add states that are approved because of other approved states."""
         for key in self.approvals:
             if key in new_york_approvals:
+                self.approvals["New York"] = ["N/A", self.approvals[key][1]]
+                self.approvals["New Jersey"] = ["N/A", self.approvals[key][1]]
                 break
-        self.approvals["New York"] = ["N/A", self.approvals[key][1]]
-        self.approvals["New Jersey"] = ["N/A", self.approvals[key][1]]
 
     def __parse_credit_type(self):
         """Split the types of credit into readable format."""
@@ -77,3 +81,4 @@ class CleClass:
                         key
                     )
                 )
+                sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
