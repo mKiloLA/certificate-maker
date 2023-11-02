@@ -5,7 +5,13 @@ import logging
 
 from certificate_maker.src.data.attorney import Attorney
 from certificate_maker.src.data.cle_class import CleClass
-from certificate_maker.src.exception_types import IncorrectDateTimeFormat, IncorrectNumberOfBreaks
+from certificate_maker.src.exception_types import (
+    IncorrectDateTimeFormat,
+    IncorrectNumberOfBreaks,
+    MissingBreakRow,
+    MissingStartRow
+)
+
 
 class Webinar:
     """Class to define one webinar event."""
@@ -100,6 +106,8 @@ class Webinar:
 
         # bool to set when next line contains information
         check_next_line = False
+        has_start = False
+        has_breaks = False
 
         # open the zoom file as a reader with a comma delimiter
         with open(zoom_file_path, "r", encoding="utf-8") as zoom_reader:
@@ -118,10 +126,16 @@ class Webinar:
                     check_next_line = True
                 elif len(line) > 0 and line[0] == "Start":
                     # get the start time of webinar
+                    has_start = True
                     self.__start_time = string_to_datetime(line[1])
                 elif len(line) > 0 and line[0] == "Breaks":
+                    has_breaks = True
+
+                    # If no breaks are put in, assume 0 breaks
+                    num_of_breaks = int(line[1]) if line[1].isdigit() else 0
+                    
                     # get the breaks. line[1] has the number of breaks
-                    for j in range(2, 2 * int(line[1]) + 1, 2):
+                    for j in range(2, 2 * num_of_breaks + 1, 2):
                         # first time is start of break, second is end of break
                         try:
                             self.__breaks.append(
@@ -142,6 +156,11 @@ class Webinar:
                     # skips the header rows when loading data into df
                     rows_to_skip = i + 1
                     break
+        if not has_start:
+            raise MissingStartRow
+        elif not has_breaks:
+            raise MissingBreakRow
+        
         # load the file into a df
         zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
 

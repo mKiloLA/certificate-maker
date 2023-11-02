@@ -78,16 +78,14 @@ class Attorney:
         """Split the states in the state attribute."""
         if (
             isinstance(self.__states, str) and 
-            (self.__states.capitalize().strip() in states_full
+            (self.__states.title().strip() in states_full
             or self.__states.upper().strip() in states_abbrev)
         ):
             split_states = [self.__states]
         else:
             logging.info(f"Check State: `{self.name}` may have multiple states.")
             if isinstance(self.__states, float):
-                logging.error(
-                    f"Check State: `{self.name}` has no state listed."
-                )
+                logging.error(f"Check State: `{self.name}` has no state listed.")
                 raise AttorneyMissingState(self.name)
             if "," in self.__states:
                 split_states = [x.strip() for x in self.__states.split(",")]
@@ -100,14 +98,12 @@ class Attorney:
             elif "/" in self.__states:
                 split_states = [x.strip() for x in self.__states.split("/")]
             else:
-                logging.error(
-                    f"Check State: `{self.name}` does not have a valid state listed."
-                )
+                logging.error(f"Check State: `{self.name}` does not have a valid state listed.")
                 raise AttorneyInvalidState(self.name)
         self.__states = [
             states_dict[x.upper()]
             if x.upper() in states_abbrev
-            else x.capitalize().strip()
+            else x.title().strip()
             for x in split_states
         ]
 
@@ -119,16 +115,10 @@ class Attorney:
             self.__bar_numbers = [self.__bar_numbers.strip()]
             return
         elif len(self.__bar_numbers) > 0 and self.__bar_numbers != "nan":
-            logging.info(
-                "Check Bar Number: `{}` has multiple bar numbers.".format(self.name)
-            )
-            split_bar_numbers = [
-                x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)
-            ]
+            logging.info("Check Bar Number: `{}` has multiple bar numbers.".format(self.name))
+            split_bar_numbers = [x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)]
         else:
-            logging.error(
-                f"Check Bar Number: `{self.name}` has no bar number listed."
-            )
+            logging.error(f"Check Bar Number: `{self.name}` has no bar number listed.")
             raise AttorneyMissingBarNumber(self.name)
         temp = []
         for entry in split_bar_numbers:
@@ -136,11 +126,9 @@ class Attorney:
                 temp.append(entry.strip())
             elif "-" in entry:
                 temp.append(entry.strip())
-            else:
-                logging.error(
-                    f"Check Bar Number: `{self.name}` does not have a valid bar number listed."
-                )
-                raise AttorneyInvalidBarNumber(self.name)
+        if len(temp) < 1:
+            logging.error(f"Check Bar Number: `{self.name}` does not have a valid bar number listed.")
+            raise AttorneyInvalidBarNumber(self.name)
         self.bar_numbers = temp
 
     def get_total_time(self):

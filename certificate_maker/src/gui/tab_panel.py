@@ -16,7 +16,10 @@ from certificate_maker.src.exception_types import (
     AttorneyMissingState,
     IncorrectNumberOfBreaks,
     AttorneyInvalidState,
-    AttorneyInvalidBarNumber
+    AttorneyInvalidBarNumber,
+    MissingBreakRow,
+    MissingStartRow,
+    MismatchingStateAndBarNumbers
 )
 
 
@@ -231,6 +234,12 @@ class TabPanel(tk.Frame):
                     self.terminal.print_message(f"Check Bar Number: `{e}` has no bar number listed.")
                 except AttorneyInvalidBarNumber as e:
                     self.terminal.print_message(f"Check Bar Number: `{e}` does not have a valid bar number listed.")
+                except MissingBreakRow:
+                    self.terminal.print_message("Check Zoom File: There is no `Breaks` row in the CSV file.")
+                except MissingStartRow:
+                    self.terminal.print_message("Check Zoom File: There is no `Start` row in the CSV file.")
+                except MismatchingStateAndBarNumbers as e:
+                    self.terminal.print_message(f"Check Bar Number and State: `{e}` has a mismatching number of bar numbers and states.")
                 except Exception as e:
                     self.terminal.print_message(
                         f"Unknown Error: double check that the information in the Zoom and Master CLE list is correct. Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")

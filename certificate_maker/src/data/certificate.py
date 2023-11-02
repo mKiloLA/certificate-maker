@@ -4,20 +4,31 @@ from certificate_maker.src.data.webinar import Webinar
 import logging
 from datetime import date
 
-from certificate_maker.src.exception_types import MissingStateApproval
+from certificate_maker.src.exception_types import MissingStateApproval, MismatchingStateAndBarNumbers
 
 
 def create_certificates(zoom_file, webinar_file):
+    # Create a webinar object using the provided files
     webinar = Webinar(zoom_file, webinar_file)
+
+    # Loop through every webinar attendee to make a certificate
     for person in webinar.attendees:
+
+        # Make sure there is one bar number for each state
+        if len(person.bar_numbers) != len(person.states):
+            raise MismatchingStateAndBarNumbers(person.name)
+        
+        # Loop through each state in their profile. Make seperate certificates for each state
         for index, state in enumerate(person.states):
+
+            # Check if the class is approved in that state, if not throw error
             try:
                 approval_information = webinar.cle_class.approvals[state]
             except:
-                logging.error(
-                    f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`."
-                )
+                logging.error(f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`.")
                 raise MissingStateApproval((person.name, state))
+            
+            # Split the class name by spaces and then check lengths. This is to prevent overflow on pdf
             og_name_list = webinar.cle_class.cle_name.split(" ")
             first_name_list = []
             overflow_name_list = []
@@ -31,22 +42,25 @@ def create_certificates(zoom_file, webinar_file):
                     total_length += len(name)
             name_1 = " ".join(first_name_list)
             name_2 = " ".join(overflow_name_list)
+
+            # create a dictionary holding all the attendee information
             certificate_data = {
                 "name": person.name,
                 "state": state,
-                "barnumber": "#{}".format(person.bar_numbers[index]),
-                "attendedhours": "{:.2f}".format(float(round_hours(person.total_time, state)) if float(round_hours(person.total_time, state)) < float(approval_information[1]) else float(approval_information[1])),
+                "barnumber": f"#{person.bar_numbers[index]}",
+                "attendedhours": f"{float(round_hours(person.total_time, state)) if float(round_hours(person.total_time, state)) < float(approval_information[1]) else float(approval_information[1]):.2f}",
                 "cledate": webinar.cle_class.cle_date.strftime("%B %d, %Y"),
                 "totalhours": approval_information[1],
-                "coursenumber": "#{}".format(approval_information[0]),
+                "coursenumber": f"#{approval_information[0]}",
                 "approvalstate": state,
                 "credits": approval_information[2],
                 "certifieddate": date.today().strftime("%m/%d/%Y"),
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
             }
+
+            # Write dictionary to pdf form located in users home directory
             path_to_form = os.path.join(os.path.expanduser('~'), "Certificates/References/certificate_form_empty.pdf")
-            #path_to_form = os.path.join(os.getcwd(), "Certificates/References/certificate_form_empty.pdf")
             reader = PdfReader(path_to_form)
             writer = PdfWriter()
             fields = reader.get_fields()
@@ -55,7 +69,6 @@ def create_certificates(zoom_file, webinar_file):
                 writer.get_page(0), certificate_data, 1
             )
 
-            # write "output" to pypdf-output.pdf
             output_filename = os.path.join(os.path.expanduser('~'), "Certificates/Output Certificates")
             os.makedirs(output_filename, exist_ok=True)
             with open(
@@ -63,14 +76,6 @@ def create_certificates(zoom_file, webinar_file):
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)
-            # os.makedirs("Certificates/Output Certificates", exist_ok=True)
-            # with open(
-            #     "Certificates/Output Certificates/{}-{}-{}.pdf".format(
-            #         person.name.replace(" ", "_"), state, person.email
-            #     ),
-            #     "wb",
-            # ) as output_stream:
-            #     writer.write(output_stream)
 
 
 def round_hours(total_time, state):
