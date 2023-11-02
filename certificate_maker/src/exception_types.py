@@ -24,3 +24,12 @@ class AttorneyInvalidState(Exception):
 
 class AttorneyInvalidBarNumber(Exception):
     pass
+
+class MissingStartRow(Exception):
+    pass
+
+class MissingBreakRow(Exception):
+    pass
+
+class MismatchingStateAndBarNumbers(Exception):
+    pass

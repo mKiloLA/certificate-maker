@@ -13,7 +13,7 @@ pyinstaller --noconfirm --clean CertificateMaker.spec
 Optionally, you can build the source with the following code:
 
 ```bash
-pyinstaller certificate_maker/__main__.py --name CertificateMaker --paths . --onefile --noconfirm --noterminal
+pyinstaller certificate_maker/__main__.py --name CertificateMaker --paths . --onefile --noconfirm --noconsole
 ```
 
 After running the command, there are two more steps:
@@ -22,7 +22,3 @@ After running the command, there are two more steps:
 2. Go into the `dist` folder that pyinstaller created and move the `CertificateMaker.app` file to your Applications folder.
 
 The app is now ready to be used. Note that the app is relatively slow to launch. It may seem that it crashes immediately, but it is just loading.
-
-## Usage
-
-Application for taking in a csv and making an attendence certificate.
