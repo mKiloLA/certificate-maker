@@ -2,7 +2,13 @@ from datetime import timedelta
 from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
 import re
 import logging
-import sys
+
+from certificate_maker.src.exception_types import (
+    AttorneyMissingBarNumber,
+    AttorneyMissingState,
+    AttorneyInvalidBarNumber,
+    AttorneyInvalidState
+)
 
 
 class Attorney:
@@ -71,12 +77,18 @@ class Attorney:
     def parse_states(self):
         """Split the states in the state attribute."""
         if (
-            self.__states.capitalize().strip() in states_full
-            or self.__states.upper().strip() in states_abbrev
+            isinstance(self.__states, str) and 
+            (self.__states.capitalize().strip() in states_full
+            or self.__states.upper().strip() in states_abbrev)
         ):
             split_states = [self.__states]
         else:
-            logging.info("Check State: `{}` has multiple states.".format(self.name))
+            logging.info(f"Check State: `{self.name}` may have multiple states.")
+            if isinstance(self.__states, float):
+                logging.error(
+                    f"Check State: `{self.name}` has no state listed."
+                )
+                raise AttorneyMissingState(self.name)
             if "," in self.__states:
                 split_states = [x.strip() for x in self.__states.split(",")]
             elif "&" in self.__states:
@@ -89,12 +101,9 @@ class Attorney:
                 split_states = [x.strip() for x in self.__states.split("/")]
             else:
                 logging.error(
-                    "Check State: `{}` has no state listed or an unrecognized format.".format(
-                        self.name
-                    )
+                    f"Check State: `{self.name}` does not have a valid state listed."
                 )
-                sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
-                split_states = []
+                raise AttorneyInvalidState(self.name)
         self.__states = [
             states_dict[x.upper()]
             if x.upper() in states_abbrev
@@ -109,7 +118,7 @@ class Attorney:
         if self.__bar_numbers.isdigit():
             self.__bar_numbers = [self.__bar_numbers.strip()]
             return
-        elif len(self.__bar_numbers) > 0:
+        elif len(self.__bar_numbers) > 0 and self.__bar_numbers != "nan":
             logging.info(
                 "Check Bar Number: `{}` has multiple bar numbers.".format(self.name)
             )
@@ -118,16 +127,20 @@ class Attorney:
             ]
         else:
             logging.error(
-                "Check Bar Number: `{}` has no bar number listed.".format(self.name)
+                f"Check Bar Number: `{self.name}` has no bar number listed."
             )
-            sys.exit('Program failed. Check `Certificates/CertificatesToCheck.log` for reason.')
-            split_bar_numbers = []
+            raise AttorneyMissingBarNumber(self.name)
         temp = []
         for entry in split_bar_numbers:
             if entry.isdigit():
                 temp.append(entry.strip())
             elif "-" in entry:
                 temp.append(entry.strip())
+            else:
+                logging.error(
+                    f"Check Bar Number: `{self.name}` does not have a valid bar number listed."
+                )
+                raise AttorneyInvalidBarNumber(self.name)
         self.bar_numbers = temp
 
     def get_total_time(self):

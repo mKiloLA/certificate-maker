@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from certificate_maker.src.gui.tab_panel import TabPanel
+from certificate_maker.src.gui.terminal_panel import TerminalPanel
 
 
 class PrimaryWindow(tk.Tk):
@@ -15,38 +16,17 @@ class PrimaryWindow(tk.Tk):
         tk.Tk.__init__(self)
         self.__style: ttk.Style = ttk.Style(self)
 
-        self.minsize(width=800, height=600)
-        self.maxsize(width=800, height=600)
+        self.minsize(width=900, height=400)
+        self.maxsize(width=900, height=400)
         self.title("Certificate Maker")
+
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
-        self.__main = None
-        self.load_tab_panel(True)
+        self.__side = TerminalPanel(self)
+        self.__side.grid(row=0, column=1, padx=10, pady=10, sticky="NSEW")
 
-    def load_tab_panel(self, set_create_tab=False) -> None:
-        """Loads an instance of the loading panel class.
-
-        Args:
-            set_load_tab: bool, determines which tab should
-                be displayed when loading the panel
-
-        Returns:
-            None
-        """
-        self.load_panel(TabPanel(self, set_create_tab))
-
-    def load_panel(self, panel) -> None:
-        """Loads an instance of a panel.
-
-        Loads a panel into the main panel slot (left side).
-        If panel already exists, first destroy current panel.
-
-        Args:
-            panel (MenuPanel): likely a menu panel, the panel
-                to load on left side of window
-        """
-        if self.__main is not None:
-            self.__main.destroy()
-        self.__main = panel
+        self.__main = TabPanel(self, self.__side, True)
         self.__main.grid(row=0, column=0, padx=10, pady=10, sticky="NSEW")
+
