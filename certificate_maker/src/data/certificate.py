@@ -2,8 +2,9 @@ import os
 from pypdf import PdfReader, PdfWriter
 from certificate_maker.src.data.webinar import Webinar
 import logging
-
 from datetime import date
+
+from certificate_maker.src.exception_types import MissingStateApproval
 
 
 def create_certificates(zoom_file, webinar_file):
@@ -14,11 +15,9 @@ def create_certificates(zoom_file, webinar_file):
                 approval_information = webinar.cle_class.approvals[state]
             except:
                 logging.error(
-                    "Check State Approvals: `{}` has no approval infomation in the state of `{}`.".format(
-                        person.name, state
-                    )
+                    f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`."
                 )
-                approval_information = ["N/A", "N/A", "N/A"]
+                raise MissingStateApproval((person.name, state))
             og_name_list = webinar.cle_class.cle_name.split(" ")
             first_name_list = []
             overflow_name_list = []
@@ -46,8 +45,8 @@ def create_certificates(zoom_file, webinar_file):
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
             }
-
-            path_to_form = os.path.join(os.getcwd(), "Certificates/References/certificate_form_empty.pdf")
+            path_to_form = os.path.join(os.path.expanduser('~'), "Certificates/References/certificate_form_empty.pdf")
+            #path_to_form = os.path.join(os.getcwd(), "Certificates/References/certificate_form_empty.pdf")
             reader = PdfReader(path_to_form)
             writer = PdfWriter()
             fields = reader.get_fields()
@@ -57,14 +56,21 @@ def create_certificates(zoom_file, webinar_file):
             )
 
             # write "output" to pypdf-output.pdf
-            os.makedirs("Certificates/Output Certificates", exist_ok=True)
+            output_filename = os.path.join(os.path.expanduser('~'), "Certificates/Output Certificates")
+            os.makedirs(output_filename, exist_ok=True)
             with open(
-                "Certificates/Output Certificates/{}-{}-{}.pdf".format(
-                    person.name.replace(" ", "_"), state, person.email
-                ),
+                os.path.join(output_filename, f"{person.name.replace(' ', '_')}-{state}-{person.email}.pdf"),
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)
+            # os.makedirs("Certificates/Output Certificates", exist_ok=True)
+            # with open(
+            #     "Certificates/Output Certificates/{}-{}-{}.pdf".format(
+            #         person.name.replace(" ", "_"), state, person.email
+            #     ),
+            #     "wb",
+            # ) as output_stream:
+            #     writer.write(output_stream)
 
 
 def round_hours(total_time, state):

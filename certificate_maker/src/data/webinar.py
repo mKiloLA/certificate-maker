@@ -1,10 +1,11 @@
 from datetime import datetime
 import pandas as pd
 import csv
+import logging
 
 from certificate_maker.src.data.attorney import Attorney
 from certificate_maker.src.data.cle_class import CleClass
-
+from certificate_maker.src.exception_types import IncorrectDateTimeFormat, IncorrectNumberOfBreaks
 
 class Webinar:
     """Class to define one webinar event."""
@@ -94,33 +95,60 @@ class Webinar:
 
     def parse_zoom_data(self, zoom_file_path, cle_master_list_path):
         """Take zoom csv file and get attendence information."""
+        # Rows to skip to get to first attendee. To be set later
         rows_to_skip = 0
+
+        # bool to set when next line contains information
         check_next_line = False
+
+        # open the zoom file as a reader with a comma delimiter
         with open(zoom_file_path, "r", encoding="utf-8") as zoom_reader:
             reader = csv.reader(zoom_reader, delimiter=",")
+
+            # i is an index and line is an iterable containing one cell of row
             for i, line in enumerate(reader):
+                # if check next line is true, then parse data from next row
                 if check_next_line:
                     cle_name = line[0]
                     cle_date = string_to_datetime(line[2]).date()
                     check_next_line = False
+                # check length to prevent invalid index error
                 elif len(line) > 0 and line[0] == "Topic":
+                    # topic comes in the row before Webinar title
                     check_next_line = True
                 elif len(line) > 0 and line[0] == "Start":
+                    # get the start time of webinar
                     self.__start_time = string_to_datetime(line[1])
                 elif len(line) > 0 and line[0] == "Breaks":
+                    # get the breaks. line[1] has the number of breaks
                     for j in range(2, 2 * int(line[1]) + 1, 2):
-                        self.__breaks.append(
-                            [
-                                string_to_datetime(line[j]),
-                                string_to_datetime(line[j + 1]),
-                            ]
-                        )
+                        # first time is start of break, second is end of break
+                        try:
+                            self.__breaks.append(
+                                [
+                                    string_to_datetime(line[j]),
+                                    string_to_datetime(line[j + 1]),
+                                ]
+                            )
+                        except IncorrectDateTimeFormat as e:
+                            # if string is empty, then not enough times were given
+                            if str(e) == "":
+                                raise IncorrectNumberOfBreaks(line[1])
+                            # otherwise, just return standard error
+                            else:
+                                raise IncorrectDateTimeFormat(e)
+                # last line before attendee data begins
                 elif len(line) > 0 and line[0] == "Attendee Details":
+                    # skips the header rows when loading data into df
                     rows_to_skip = i + 1
                     break
+        # load the file into a df
         zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
+
+        # create new column for name by combining first and last
         zoom_data["Name"] = zoom_data["First Name"] + " " + zoom_data["Last Name"]
 
+        # not sure what this is yet
         try:
             cut_off = zoom_data.iloc[
                 zoom_data[zoom_data["Attended"] == "Other Attended"].index.to_list()[
@@ -130,7 +158,11 @@ class Webinar:
             zoom_data.drop(cut_off, inplace=True)
         except:
             pass
+
+        # Get all users that signed up but did not attend
         did_not_attend = zoom_data[zoom_data["Attended"] == "No"].index.to_list()
+
+        # drop data columns we do not use
         zoom_data.drop(
             columns=[
                 "First Name",
@@ -145,8 +177,14 @@ class Webinar:
             ],
             inplace=True,
         )
+
+        # drop the users that signed up and did not attend
         zoom_data.drop(did_not_attend, inplace=True)
+
+        # build attendence roster with zoom data
         self.__build_attendence_roster(zoom_data)
+
+        # for each attendee, calculate their time in class
         for person in self.attendees:
             person.adjust_for_start(self.start_time)
             person.remove_dead_time()
@@ -158,11 +196,13 @@ class Webinar:
             person.parse_bar_numbers()
             person.parse_states()
 
+        # create a CLE object and add approvals
         self.cle_class = CleClass(cle_name, cle_date)
         self.cle_class.get_approvals(cle_master_list_path)
 
 
 def string_to_datetime(time):
+    """Given a date as a string, return a datetime object."""
     try:
         time = datetime.strptime(time, "%m/%d/%Y %H:%M")
     except:
@@ -187,7 +227,9 @@ def string_to_datetime(time):
                                 try:
                                     time = datetime.strptime(time, "%b %d, %Y %H:%M:%S")
                                 except:
-                                    time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
-
-
+                                    try:
+                                        time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
+                                    except:
+                                        logging.error(f"Failed to parse time information for `{time}`.")
+                                        raise IncorrectDateTimeFormat(time)
     return time.replace(second=0, microsecond=0)

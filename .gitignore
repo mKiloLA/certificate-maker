@@ -1,10 +1,11 @@
 *.csv
 *.xlsx
 *.log
-/output-certificates/*
+Certificates/Output\ Certificates
 /.venv
 /.vscode
 __pycache__
 /build
 /dist
 .pylintrc
+.DS_Store
