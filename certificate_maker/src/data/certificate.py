@@ -4,6 +4,7 @@ from certificate_maker.src.data.webinar import Webinar
 import logging
 from datetime import date
 
+from certificate_maker.src.data.ref import states_dict
 from certificate_maker.src.exception_types import MissingStateApproval, MismatchingStateAndBarNumbers
 
 
@@ -57,6 +58,7 @@ def create_certificates(zoom_file, webinar_file):
                 "certifieddate": date.today().strftime("%m/%d/%Y"),
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
+                "email": person.email
             }
 
             # Write dictionary to pdf form located in users home directory
@@ -69,14 +71,16 @@ def create_certificates(zoom_file, webinar_file):
                 writer.get_page(0), certificate_data, 1
             )
 
+            first_name = person.name.split(" ")[0]
+            last_name = person.name.split(" ")[1]
+            date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
             output_filename = os.path.join(os.path.expanduser('~'), "Certificates/Output Certificates")
             os.makedirs(output_filename, exist_ok=True)
             with open(
-                os.path.join(output_filename, f"{person.name.replace(' ', '_')}-{state}-{person.email}.pdf"),
+                os.path.join(output_filename, f"{last_name}, {first_name}, {state}#{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf"),
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)
-
 
 def round_hours(total_time, state):
     """Round the attended hours according to state guidelines."""
