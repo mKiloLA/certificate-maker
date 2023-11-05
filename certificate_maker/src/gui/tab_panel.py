@@ -6,6 +6,7 @@ Version: 0.1
 import tkinter as tk
 from tkinter import ttk, filedialog
 
+from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.exception_types import (
     IncorrectWebinarTitle,
@@ -33,6 +34,7 @@ class TabPanel(tk.Frame):
 
         self.__zoom_file = None
         self.__webinar_file = None
+        self.__email_folder = "/Users/zakoster/Certificates/Output Certificates" # None
         self.terminal = terminal
 
         self.__loading_tabs: ttk.Notebook = ttk.Notebook(master=self)
@@ -82,14 +84,6 @@ class TabPanel(tk.Frame):
             justify="left",
         )
         text1.grid(row=0, column=0, padx=2, pady=2, sticky="NW")
-
-        # image1 = Image.open("certificate_maker/src/static/sample_excel.png")
-        # width, height = image1.size
-        # image1 = image1.resize((width // 3, height // 3))
-        # sample_excel_image = ImageTk.PhotoImage(image1)
-        # sample_problem = tk.Label(master=instructions_tab, image=sample_excel_image)
-        # sample_problem.image = sample_excel_image
-        # sample_problem.grid(row=1, column=0, padx=2, pady=2, sticky="NSEW")
 
         # ----- Create the Create Tab -----
         create_tab.grid_rowconfigure(0, weight=1)
@@ -153,18 +147,21 @@ class TabPanel(tk.Frame):
         # ----- Create the Email Tab -----
         email_tab.grid_rowconfigure(0, weight=1)
         email_tab.grid_rowconfigure(1, weight=1)
+        email_tab.grid_rowconfigure(2, weight=1)
 
         email_tab.grid_columnconfigure(0, weight=1)
-        email_tab.grid_columnconfigure(1, weight=4)
+        email_tab.grid_columnconfigure(1, weight=1)
 
         email_file = tk.Button(
             email_tab,
             font=("Arial", 10),
-            text="Browse for Zoom File",
+            text="Browse for Email Folder",
             command=lambda: self.action_performed("email"),
             bg="light gray",
+            height=5,
+            width=20
         )
-        email_file.grid(row=0, column=0, padx=2, pady=30, sticky="NSEW")
+        email_file.grid(row=0, column=0, padx=2, pady=2)
 
         self.email_label = tk.Label(
             master=email_tab,
@@ -172,16 +169,29 @@ class TabPanel(tk.Frame):
             font=("Arial", 12),
             justify="left",
         )
-        self.email_label.grid(row=0, column=1, padx=2, pady=2, sticky="W")
+        self.email_label.grid(row=0, column=1, padx=2, pady=2)
+
+        test_submit = tk.Button(
+            email_tab,
+            font=("Arial", 10),
+            text="Test Send Emails",
+            command=lambda: self.action_performed("test_email"),
+            bg="light gray",
+            height=5,
+            width=50
+        )
+        test_submit.grid(row=1, column=0, columnspan=2, padx=2, pady=2)
 
         submit = tk.Button(
             email_tab,
-            font=("Arial", 12),
-            text="Submit Files",
+            font=("Arial", 10),
+            text="Send Emails to Attorneys",
             command=lambda: self.action_performed("submit_email"),
-            bg="gray",
+            bg="light gray",
+            height=5,
+            width=50
         )
-        submit.grid(row=2, columnspan=2, padx=2, pady=30, sticky="NSEW")
+        submit.grid(row=2, column=0, columnspan=2, padx=2, pady=2)
 
     def action_performed(self, text: str) -> None:
         """Performs an action given a string.
@@ -247,6 +257,25 @@ class TabPanel(tk.Frame):
                 self.zoom_label.configure(text="You must select a file!")
             if self.__webinar_file is None:
                 self.webinar_label.configure(text="You must select a file!")
+        elif text == "test_email":
+            try:
+                self.terminal.print_message(f"Sending test emails . . .")
+                send_emails(self.__email_folder, demo=True)
+                self.terminal.print_message(f". . . Test emails sent!")
+            except Exception as e:
+                self.terminal.print_message(f"Unknown Error: Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")
+        elif text == "submit_email":
+            try:
+                self.terminal.print_message(f"Sending emails . . .")
+                send_emails(self.__email_folder, demo=False)
+                self.terminal.print_message(f". . . Emails sent!")
+            except Exception as e:
+                self.terminal.print_message(f"Unknown Error: Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")
+        elif text == "email":
+            self.__email_folder = filedialog.askdirectory(title="Browse for email folder")
+            filename = self.__email_folder.split("/")[-1]
+            self.email_label.configure(text="{} selected.".format(filename))
+            self.terminal.print_message(f"Email folder: {filename} selected.")
         else:
             pass
 
