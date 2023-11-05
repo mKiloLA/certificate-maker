@@ -126,7 +126,7 @@ Thank you for attending our recent webinar, we do hope you enjoyed it.
 
 I have attached a COL certificate of attendance to this email, which you can keep for your records. {bar_statement}
 
-If you have any questions or concerns, please let me know. Thank you and have a great day!!
+If you have any questions or concerns, please let me know. If you have issues viewing this certificate, open with Adobe Acrobat or Google Chrome. Thank you and have a great day!!
 
 Sincerely,
 Wendi M. Oster
