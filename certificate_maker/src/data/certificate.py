@@ -1,4 +1,5 @@
 import os
+import json
 from pypdf import PdfReader, PdfWriter
 from certificate_maker.src.data.webinar import Webinar
 import logging
@@ -11,6 +12,21 @@ from certificate_maker.src.exception_types import MissingStateApproval, Mismatch
 def create_certificates(zoom_file, webinar_file):
     # Create a webinar object using the provided files
     webinar = Webinar(zoom_file, webinar_file)
+    date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
+    cle_name = webinar.cle_class.cle_name
+
+    output_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim} {cle_name.replace(':', '')}/")
+    desired_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim}, {cle_name.replace(':', '-')}/")
+    json_filename = os.path.join(output_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
+
+    os.makedirs(output_filename, exist_ok=True)
+    os.makedirs(desired_filename, exist_ok=True)
+
+    serialization_dict = {
+        "filepath": output_filename,
+        "desiredpath": desired_filename
+    }
+    attendee_list = []
 
     # Loop through every webinar attendee to make a certificate
     for person in webinar.attendees:
@@ -73,14 +89,22 @@ def create_certificates(zoom_file, webinar_file):
 
             first_name = person.name.split(" ")[0]
             last_name = person.name.split(" ")[1]
-            date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
-            output_filename = os.path.join(os.path.expanduser('~'), "Certificates/Output Certificates")
-            os.makedirs(output_filename, exist_ok=True)
+
+            # add rows to certificate data for serialization
+            certificate_data["filename"] = os.path.join(desired_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf")
+            certificate_data["desiredname"] = os.path.join(desired_filename, f"{last_name}, {first_name}, {state}#{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf")
+            attendee_list.append(certificate_data)
+
             with open(
-                os.path.join(output_filename, f"{last_name}, {first_name}, {state}#{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf"),
+                os.path.join(output_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf"),
                 "wb",
             ) as output_stream:
                 writer.write(output_stream)
+
+    serialization_dict["attendees"] = attendee_list
+    json_object = json.dumps(serialization_dict, indent=4)
+    with open(json_filename, "w") as outfile:
+        outfile.write(json_object)
 
 def round_hours(total_time, state):
     """Round the attended hours according to state guidelines."""

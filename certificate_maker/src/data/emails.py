@@ -1,5 +1,6 @@
 import os
-from pypdf import PdfReader
+import json
+import shutil
 import smtplib, ssl
 from email import encoders
 from email.mime.base import MIMEBase
@@ -14,9 +15,10 @@ class AttorneyEmail:
         self.clename = clename
         self.cledate = cledate
 
-def send_emails(foldername, demo=True):
-    files_in_folder = [x for x in os.listdir(foldername) if x.endswith(".pdf")]
-    file_locations = [os.path.join(foldername, x) for x in files_in_folder ]
+def send_emails(json_filepath, demo=True):
+    # Open json file the information
+    with open(json_filepath, 'r') as openfile:
+        webinar_dict = json.load(openfile)
 
     with open(os.path.join(os.path.expanduser('~'), "Certificates/References/Outlook.txt"), "r") as reader:
         sender_email = reader.readline().strip()
@@ -27,17 +29,15 @@ def send_emails(foldername, demo=True):
         server.starttls(context=context)
         server.login(sender_email, password)
 
-        for certificate in file_locations:
-            filename = certificate
-            reader = PdfReader(filename)
-            fields = reader.get_form_text_fields()
+        for attendee in webinar_dict["attendees"]:
+            filename = attendee["desiredname"]
 
             person = AttorneyEmail(
-                name=fields["name"],
-                state=fields["state"],
-                email=fields["email"],
-                clename=' '.join([fields['clename'], fields['overflow']]),
-                cledate=fields["cledate"]
+                name=attendee["name"],
+                state=attendee["state"],
+                email=attendee["email"],
+                clename=f"{attendee['clename']} {attendee['overflow']}",
+                cledate=attendee["cledate"]
             )
 
             body = make_body(person)
@@ -68,13 +68,15 @@ def send_emails(foldername, demo=True):
             # Add header as key/value pair to attachment part
             part.add_header(
                 "Content-Disposition",
-                f"attachment; filename={person.name} Certificate of Attendance.pdf",
+                "attachment; filename=CertificateOfAttendance.pdf",
             )
 
             # Add attachment to message and convert message to string
             message.attach(part)
             text = message.as_string()
             server.sendmail(sender_email, receiver_email, text)
+    if not demo:
+        shutil.rmtree(webinar_dict["filepath"])
 
 def make_body(attorney):
     bar_statement = ""
@@ -126,7 +128,7 @@ Thank you for attending our recent webinar, we do hope you enjoyed it.
 
 I have attached a COL certificate of attendance to this email, which you can keep for your records. {bar_statement}
 
-If you have any questions or concerns, please let me know. If you have issues viewing this certificate, open with Adobe Acrobat or Google Chrome. Thank you and have a great day!!
+If you have any questions or concerns, please let me know. Thank you and have a great day!!
 
 Sincerely,
 Wendi M. Oster
