@@ -79,8 +79,8 @@ class Webinar:
         zoom_data = zoom_data.reset_index()
         for _, attorney in zoom_data.iterrows():
             new_attorney = Attorney(
-                name=attorney["Name"],
-                email=attorney["Email"],
+                name=attorney["Name"].strip(),
+                email=attorney["Email"].strip(),
                 times=[
                     string_to_datetime(attorney["Join Time"]),
                     string_to_datetime(attorney["Leave Time"]),
@@ -165,7 +165,7 @@ class Webinar:
         zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
 
         # create new column for name by combining first and last
-        zoom_data["Name"] = zoom_data["First Name"] + " " + zoom_data["Last Name"]
+        zoom_data["Name"] = zoom_data["First Name"].str.strip() + " " + zoom_data["Last Name"].str.strip()
 
         # not sure what this is yet
         try:
