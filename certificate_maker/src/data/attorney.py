@@ -14,8 +14,9 @@ from certificate_maker.src.exception_types import (
 class Attorney:
     """Class to represent an attorney attending a CLE."""
 
-    def __init__(self, name, email, times, state, bar_number):
-        self.__name = name
+    def __init__(self, first_name, last_name, email, times, state, bar_number):
+        self.__first_name = first_name
+        self.__last_name = last_name
         self.__email = email
         self.__times = [times]
         self.__states = state
@@ -24,11 +25,23 @@ class Attorney:
 
     @property
     def name(self):
-        return self.__name
+        return f"{self.__first_name} {self.__last_name}"
 
-    @name.setter
-    def name(self, name):
-        self.__name = name
+    @property
+    def first_name(self):
+        return self.__first_name
+
+    @first_name.setter
+    def first_name(self, first_name):
+        self.__first_name = first_name
+
+    @property
+    def last_name(self):
+        return self.__last_name
+
+    @last_name.setter
+    def last_name(self, last_name):
+        self.__last_name = last_name
 
     @property
     def email(self):
@@ -116,7 +129,7 @@ class Attorney:
             return
         elif len(self.__bar_numbers) > 0 and self.__bar_numbers != "nan":
             logging.info("Check Bar Number: `{}` has multiple bar numbers.".format(self.name))
-            split_bar_numbers = [x.strip() for x in re.split(", | |&|;|and|/", self.__bar_numbers)]
+            split_bar_numbers = [x.strip() for x in re.split(", |,| |&|;|and|/", self.__bar_numbers)]
         else:
             logging.error(f"Check Bar Number: `{self.name}` has no bar number listed.")
             raise AttorneyMissingBarNumber(self.name)
@@ -220,7 +233,7 @@ class Attorney:
     def __eq__(self, __o: object) -> bool:
         """Instances are equal if the name is the same."""
         if isinstance(__o, Attorney):
-            if self.__name == __o.name:
+            if self.name == __o.name:
                 return True
             else:
                 return False

@@ -5,11 +5,11 @@ from certificate_maker.src.data.webinar import Webinar
 import logging
 from datetime import date
 
-from certificate_maker.src.data.ref import states_dict
+from certificate_maker.src.data.ref import states_dict, us_state_to_abbrev
 from certificate_maker.src.exception_types import MissingStateApproval, MismatchingStateAndBarNumbers
 
 
-def create_certificates(zoom_file, webinar_file):
+def create_certificates(zoom_file, webinar_file, create=True):
     # Create a webinar object using the provided files
     webinar = Webinar(zoom_file, webinar_file)
     date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
@@ -19,8 +19,9 @@ def create_certificates(zoom_file, webinar_file):
     desired_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim}, {cle_name.replace(':', '-')}/")
     json_filename = os.path.join(output_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
 
-    os.makedirs(output_filename, exist_ok=True)
-    os.makedirs(desired_filename, exist_ok=True)
+    if create:
+        os.makedirs(output_filename, exist_ok=True)
+        os.makedirs(desired_filename, exist_ok=True)
 
     serialization_dict = {
         "filepath": output_filename,
@@ -77,34 +78,37 @@ def create_certificates(zoom_file, webinar_file):
                 "email": person.email
             }
 
-            # Write dictionary to pdf form located in users home directory
-            path_to_form = os.path.join(os.path.expanduser('~'), "Certificates/References/certificate_form_empty.pdf")
-            reader = PdfReader(path_to_form)
-            writer = PdfWriter()
-            fields = reader.get_fields()
-            writer.append(reader)
-            writer.update_page_form_field_values(
-                writer.get_page(0), certificate_data, 1
-            )
+            if create:
+                # Write dictionary to pdf form located in users home directory
+                path_to_form = os.path.join(os.path.expanduser('~'), "Certificates/References/certificate_form_empty.pdf")
+                reader = PdfReader(path_to_form)
+                writer = PdfWriter()
+                fields = reader.get_fields()
+                writer.append(reader)
+                writer.update_page_form_field_values(
+                    writer.get_page(0), certificate_data, 1
+                )
 
-            first_name = person.name.split(" ")[0]
-            last_name = person.name.split(" ")[1]
+                first_name = person.first_name
+                last_name = person.last_name
 
-            # add rows to certificate data for serialization
-            certificate_data["filename"] = os.path.join(desired_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf")
-            certificate_data["desiredname"] = os.path.join(desired_filename, f"{last_name}, {first_name}, {state}#{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf")
-            attendee_list.append(certificate_data)
+                # add rows to certificate data for serialization
+                certificate_data["filename"] = os.path.join(desired_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf")
+                certificate_data["desiredname"] = os.path.join(desired_filename, f"{last_name}, {first_name}, {us_state_to_abbrev[state]} #{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf")
+                attendee_list.append(certificate_data)
 
-            with open(
-                os.path.join(output_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf"),
-                "wb",
-            ) as output_stream:
-                writer.write(output_stream)
+                with open(
+                    os.path.join(output_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf"),
+                    "wb",
+                ) as output_stream:
+                    writer.write(output_stream)
 
-    serialization_dict["attendees"] = attendee_list
-    json_object = json.dumps(serialization_dict, indent=4)
-    with open(json_filename, "w") as outfile:
-        outfile.write(json_object)
+    if create:
+        serialization_dict["attendees"] = attendee_list
+        json_object = json.dumps(serialization_dict, indent=4)
+        with open(json_filename, "w") as outfile:
+            outfile.write(json_object)
+        return json_filename
 
 def round_hours(total_time, state):
     """Round the attended hours according to state guidelines."""

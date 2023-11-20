@@ -8,6 +8,7 @@ from certificate_maker.src.data.cle_class import CleClass
 from certificate_maker.src.exception_types import (
     IncorrectDateTimeFormat,
     IncorrectNumberOfBreaks,
+    IncorrectBreakDate,
     MissingBreakRow,
     MissingStartRow
 )
@@ -79,7 +80,8 @@ class Webinar:
         zoom_data = zoom_data.reset_index()
         for _, attorney in zoom_data.iterrows():
             new_attorney = Attorney(
-                name=attorney["Name"].strip(),
+                first_name=attorney["First Name"].strip(),
+                last_name=attorney["Last Name"].strip(),
                 email=attorney["Email"].strip(),
                 times=[
                     string_to_datetime(attorney["Join Time"]),
@@ -138,10 +140,14 @@ class Webinar:
                     for j in range(2, 2 * num_of_breaks + 1, 2):
                         # first time is start of break, second is end of break
                         try:
+                            break_start = string_to_datetime(line[j])
+                            break_end = string_to_datetime(line[j + 1])
+                            if not (break_start.date()==cle_date and break_end.date()==cle_date):
+                                raise IncorrectBreakDate
                             self.__breaks.append(
                                 [
-                                    string_to_datetime(line[j]),
-                                    string_to_datetime(line[j + 1]),
+                                    break_start,
+                                    break_end
                                 ]
                             )
                         except IncorrectDateTimeFormat as e:
@@ -151,6 +157,8 @@ class Webinar:
                             # otherwise, just return standard error
                             else:
                                 raise IncorrectDateTimeFormat(e)
+                        except IncorrectBreakDate:
+                            raise IncorrectBreakDate
                 # last line before attendee data begins
                 elif len(line) > 0 and line[0] == "Attendee Details":
                     # skips the header rows when loading data into df
@@ -163,9 +171,6 @@ class Webinar:
         
         # load the file into a df
         zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
-
-        # create new column for name by combining first and last
-        zoom_data["Name"] = zoom_data["First Name"].str.strip() + " " + zoom_data["Last Name"].str.strip()
 
         # not sure what this is yet
         try:
@@ -184,8 +189,6 @@ class Webinar:
         # drop data columns we do not use
         zoom_data.drop(
             columns=[
-                "First Name",
-                "Last Name",
                 "User Name (Original Name)",
                 "Phone",
                 "Registration Time",
