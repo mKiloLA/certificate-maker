@@ -33,3 +33,6 @@ class MissingBreakRow(Exception):
 
 class MismatchingStateAndBarNumbers(Exception):
     pass
+
+class IncorrectBreakDate(Exception):
+    pass

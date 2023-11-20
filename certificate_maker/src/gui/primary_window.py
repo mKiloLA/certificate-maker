@@ -22,11 +22,11 @@ class PrimaryWindow(tk.Tk):
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=2)
 
         self.__side = TerminalPanel(self)
         self.__side.grid(row=0, column=1, padx=10, pady=10, sticky="NSEW")
 
-        self.__main = TabPanel(self, self.__side, True)
+        self.__main = TabPanel(self, self.__side)
         self.__main.grid(row=0, column=0, padx=10, pady=10, sticky="NSEW")
 
