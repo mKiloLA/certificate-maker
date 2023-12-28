@@ -62,6 +62,8 @@ def create_certificates(zoom_file, webinar_file, create=True):
             name_2 = " ".join(overflow_name_list)
 
             # create a dictionary holding all the attendee information
+            print(person.times)
+            print(person.total_time)
             certificate_data = {
                 "name": person.name,
                 "state": state,
