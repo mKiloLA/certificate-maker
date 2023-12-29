@@ -52,7 +52,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
             overflow_name_list = []
             total_length = 0
             for name in og_name_list:
-                if total_length + len(name) >= 40:
+                if total_length + len(name) >= 30:
                     overflow_name_list.append(name)
                     total_length += len(name)
                 else:
@@ -62,6 +62,8 @@ def create_certificates(zoom_file, webinar_file, create=True):
             name_2 = " ".join(overflow_name_list)
 
             # create a dictionary holding all the attendee information
+            print(person.times)
+            print(person.total_time)
             certificate_data = {
                 "name": person.name,
                 "state": state,

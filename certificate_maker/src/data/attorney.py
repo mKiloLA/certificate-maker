@@ -212,15 +212,18 @@ class Attorney:
         """Makes sure time is not counted during breaks."""
         for break_period in breaks:
             for index, period in enumerate(self.__times):
+                # If time period starts before break and ends during break
                 if (
-                    period[0] < break_period[0]
-                    and period[1] < break_period[1]
-                    and period[1] > break_period[0]
+                    period[0] <= break_period[0]
+                    and period[1] <= break_period[1]
+                    and period[1] >= break_period[0]
                 ):
                     self.__times[index][1] = break_period[0]
-                elif period[0] < break_period[1] and period[0] > break_period[0]:
+                # If time period starts during the break
+                elif period[0] <= break_period[1] and period[0] >= break_period[0]:
                     self.__times[index][0] = break_period[1]
-                elif period[0] < break_period[0] and period[1] > break_period[1]:
+                # If break is encompassed by the time period
+                elif period[0] <= break_period[0] and period[1] >= break_period[1]:
                     self.__times[index] = [period[0], break_period[0]]
                     self.__times.append([break_period[1], period[1]])
 
