@@ -38,7 +38,8 @@ def create_certificates(zoom_file, webinar_file, create=True):
         
         # Loop through each state in their profile. Make seperate certificates for each state
         for index, state in enumerate(person.states):
-
+            print(person.name)
+            print(webinar.cle_class.approvals[state])
             # Check if the class is approved in that state, if not throw error
             try:
                 approval_information = webinar.cle_class.approvals[state]
@@ -62,8 +63,6 @@ def create_certificates(zoom_file, webinar_file, create=True):
             name_2 = " ".join(overflow_name_list)
 
             # create a dictionary holding all the attendee information
-            print(person.times)
-            print(person.total_time)
             certificate_data = {
                 "name": person.name,
                 "state": state,
