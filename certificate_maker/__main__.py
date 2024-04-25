@@ -1,6 +1,7 @@
 from certificate_maker.src.gui.primary_window import PrimaryWindow
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.data.emails import send_emails
+from certificate_maker.src.data.pdf_flatten import pdf_flatten
 import logging
 from os import path
 
@@ -15,11 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    # zoom = r""
-    # master = r""
-    # emails = r""
-    # create_certificates(zoom, master)
-    # send_emails(emails)
     PrimaryWindow().mainloop()
 
 
