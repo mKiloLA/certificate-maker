@@ -87,9 +87,11 @@ class Webinar:
                     string_to_datetime(attorney["Join Time"]),
                     string_to_datetime(attorney["Leave Time"]),
                 ],
-                state=attorney["Bar State"].strip(),
-                bar_number=str(attorney["Bar Number"].strip()),
+                # CHANGE
+                state=[str(attorney["Bar State #1"]).strip(), str(attorney["Bar State #2"]).strip(), str(attorney["Bar State #3"]).strip()],
+                bar_number=[str(attorney["Bar Number #1"]).strip(), str(attorney["Bar Number #2"]).strip(), str(attorney["Bar Number #3"]).strip()]
             )
+
             if new_attorney in self.__attendees:
                 old_attorney = self.get_attendee(new_attorney)
                 old_attorney.add_time(

@@ -89,60 +89,37 @@ class Attorney:
 
     def parse_states(self):
         """Split the states in the state attribute."""
-        if (
-            isinstance(self.__states, str) and 
-            (self.__states.title().strip() in states_full
-            or self.__states.upper().strip() in states_abbrev)
-        ):
-            split_states = [self.__states]
-        else:
-            logging.info(f"Check State: `{self.name}` may have multiple states.")
-            if isinstance(self.__states, float):
-                logging.error(f"Check State: `{self.name}` has no state listed.")
-                raise AttorneyMissingState(self.name)
-            if "," in self.__states:
-                split_states = [x.strip() for x in self.__states.split(",")]
-            elif "&" in self.__states:
-                split_states = [x.strip() for x in self.__states.split("&")]
-            elif ";" in self.__states:
-                split_states = [x.strip() for x in self.__states.split(";")]
-            elif "and" in self.__states:
-                split_states = [x.strip() for x in self.__states.split("and")]
-            elif "/" in self.__states:
-                split_states = [x.strip() for x in self.__states.split("/")]
+        checked_state_list = []
+        for state in self.__states:
+            if isinstance(state, str) and (state.title().strip() in states_full or state.upper().strip() in states_abbrev):
+                checked_state_list.append(state)
             else:
+                logging.info(f"Check State: `{self.name}` may have two states in one spot.")
+                if state == "nan":
+                    break
                 logging.error(f"Check State: `{self.name}` does not have a valid state listed.")
                 raise AttorneyInvalidState(self.name)
         self.__states = [
             states_dict[x.upper()]
             if x.upper() in states_abbrev
             else x.title().strip()
-            for x in split_states
+            for x in checked_state_list
         ]
 
     def parse_bar_numbers(self):
         """Split the bar numbers into a list."""
-        self.__bar_numbers = self.__bar_numbers.replace("#", "")
-        self.__bar_numbers = self.__bar_numbers.replace(".0", "")
-        if self.__bar_numbers.isdigit():
-            self.__bar_numbers = [self.__bar_numbers.strip()]
-            return
-        elif len(self.__bar_numbers) > 0 and self.__bar_numbers != "nan":
-            logging.info("Check Bar Number: `{}` has multiple bar numbers.".format(self.name))
-            split_bar_numbers = [x.strip() for x in re.split(", |,| |&|;|and|/", self.__bar_numbers)]
-        else:
-            logging.error(f"Check Bar Number: `{self.name}` has no bar number listed.")
-            raise AttorneyMissingBarNumber(self.name)
-        temp = []
-        for entry in split_bar_numbers:
-            if entry.isdigit():
-                temp.append(entry.strip())
-            elif "-" in entry:
-                temp.append(entry.strip())
-        if len(temp) < 1:
+        checked_bar_numbers = []
+        for number in self.bar_numbers:
+            number = number.replace("#", "")
+            number = number.replace(".0", "")
+            if number.isdigit():
+                checked_bar_numbers.append(number.strip())
+            elif "-" in number:
+                checked_bar_numbers.append(number.strip())
+        if not len(checked_bar_numbers):
             logging.error(f"Check Bar Number: `{self.name}` does not have a valid bar number listed.")
             raise AttorneyInvalidBarNumber(self.name)
-        self.bar_numbers = temp
+        self.bar_numbers = checked_bar_numbers
 
     def get_total_time(self):
         """Get total time spent at webinar."""
