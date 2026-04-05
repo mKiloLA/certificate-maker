@@ -16,8 +16,8 @@ class PrimaryWindow(tk.Tk):
         tk.Tk.__init__(self)
         self.__style: ttk.Style = ttk.Style(self)
 
-        self.minsize(width=900, height=400)
-        self.maxsize(width=900, height=400)
+        self.minsize(width=1200, height=400)
+        self.maxsize(width=1200, height=400)
         self.title("Certificate Maker")
 
         self.grid_rowconfigure(0, weight=1)

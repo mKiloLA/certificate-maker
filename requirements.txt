@@ -1,5 +1,9 @@
-pypdf == 3.11.1
-pandas == 2.0.3
-openpyxl == 3.1.2
-pillow == 10.0.0
-selenium == 4.15.2
+pypdf
+setuptools
+pandas
+openpyxl
+pillow
+selenium
+pytest
+black
+pyinstaller

@@ -36,3 +36,21 @@ class MismatchingStateAndBarNumbers(Exception):
 
 class IncorrectBreakDate(Exception):
     pass
+
+class MissingSubmissionData(Exception):
+    pass
+
+class MissingEvaluationData(Exception):
+    pass
+
+class MalformedCROString(Exception):
+    pass
+
+class MalformedEvaluationQuestionResponse(Exception):
+    pass
+
+class ReferenceFileMissingSheet(Exception):
+    pass
+
+class RefereneFileMissingCourse(Exception):
+    pass

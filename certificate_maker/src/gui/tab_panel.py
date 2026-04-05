@@ -8,6 +8,7 @@ from tkinter import ttk, filedialog
 
 from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
+from certificate_maker.src.data.on_demand.on_demand import create_on_demand_report
 from certificate_maker.src.data.pdf_flatten import pdf_flatten
 from certificate_maker.src.exception_types import (
     IncorrectWebinarTitle,
@@ -37,6 +38,9 @@ class TabPanel(tk.Frame):
         self.__zoom_file = None
         self.__webinar_file = None
         self.__json_file = None
+        self.__attend_file = "/Users/zakoster/Downloads/01012026-01112026, Freestone Credit Submission Report.csv"
+        self.__eval_file = "/Users/zakoster/Downloads/01012026-01112026, Freestone Course Evaluation Report.csv"
+        self.__on_demand_file = "/Users/zakoster/Downloads/On-Demand CLE Class Approvals, As of 04022026.xlsx"
         self.terminal = terminal
 
         self.__loading_tabs: ttk.Notebook = ttk.Notebook(master=self)
@@ -44,17 +48,20 @@ class TabPanel(tk.Frame):
         flatten_tab: ttk.Frame = ttk.Frame(self.__loading_tabs)
         create_tab: ttk.Frame = ttk.Frame(self.__loading_tabs)
         email_tab: ttk.Frame = ttk.Frame(self.__loading_tabs)
+        on_demand_tab: ttk.Frame = ttk.Frame(self.__loading_tabs)
 
         self.__loading_tabs.add(verification_tab, text="Verify")
         self.__loading_tabs.add(create_tab, text="Create Certificates")
         self.__loading_tabs.add(flatten_tab, text="PDF Flatten")
         self.__loading_tabs.add(email_tab, text="Send Emails")
+        self.__loading_tabs.add(on_demand_tab, text="On-Demand")
         self.__loading_tabs.pack(expand=1, fill="both")
 
         verification_tab.grid_columnconfigure(0, weight=1)
         create_tab.grid_columnconfigure(0, weight=1)
         flatten_tab.grid_columnconfigure(0, weight=1)
         email_tab.grid_columnconfigure(0, weight=1)
+        on_demand_tab.grid_columnconfigure(0, weight=1)
 
         if set_create_tab:
             self.__loading_tabs.select(create_tab)
@@ -214,7 +221,7 @@ class TabPanel(tk.Frame):
         )
         json_submit.grid(row=1, column=0, columnspan=2, padx=2, pady=2)
 
-        # ----- Create the Email Tab -----
+        # ----- Create the Send Emails Tab -----
         email_tab.grid_rowconfigure(0, weight=1)
         email_tab.grid_rowconfigure(1, weight=1)
         email_tab.grid_rowconfigure(2, weight=1)
@@ -262,6 +269,85 @@ class TabPanel(tk.Frame):
             width=50
         )
         submit.grid(row=2, column=0, columnspan=2, padx=2, pady=2)
+
+        # Create On-Demand tab
+        on_demand_tab.grid_rowconfigure(0, weight=1)
+        on_demand_tab.grid_rowconfigure(1, weight=1)
+        on_demand_tab.grid_rowconfigure(2, weight=1)
+        on_demand_tab.grid_rowconfigure(3, weight=1)
+
+        on_demand_tab.grid_columnconfigure(0, weight=1, minsize=150)
+        on_demand_tab.grid_columnconfigure(1, weight=1, minsize=150)
+
+        attend_file = tk.Button(
+            on_demand_tab,
+            font=("Arial", 10),
+            text="Browse for Attendance File",
+            command=lambda: self.action_performed("attend-file"),
+            bg="light gray",
+            height=5,
+            width=20,
+        )
+        attend_file.grid(row=0, column=0, padx=2, pady=2)
+
+        self.attend_label = tk.Label(
+            master=on_demand_tab,
+            text="No File Selected",
+            font=("Arial", 12),
+            justify="left",
+        )
+        self.attend_label.grid(row=0, column=1, padx=2, pady=2, sticky="W")
+
+        eval_file = tk.Button(
+            on_demand_tab,
+            font=("Arial", 10),
+            text="Browse for Evaluation File",
+            command=lambda: self.action_performed("eval-file"),
+            bg="light gray",
+            height=5,
+            width=20
+        )
+        eval_file.grid(row=1, column=0, padx=2, pady=2)
+
+        self.eval_label = tk.Label(
+            master=on_demand_tab,
+            text="No File Selected",
+            font=("Arial", 12),
+            justify="left",
+        )
+        self.eval_label.grid(row=1, column=1, padx=2, pady=2, sticky="W")
+
+        on_demand_file = tk.Button(
+            on_demand_tab,
+            font=("Arial", 10),
+            text="Browse for On-Demand File",
+            command=lambda: self.action_performed("on-demand-file"),
+            bg="light gray",
+            height=5,
+            width=20
+        )
+        on_demand_file.grid(row=2, column=0, padx=2, pady=2)
+
+        self.on_demand_label = tk.Label(
+            master=on_demand_tab,
+            text="No File Selected",
+            font=("Arial", 12),
+            justify="left",
+        )
+        self.on_demand_label.grid(row=2, column=1, padx=2, pady=2, sticky="W")
+
+        submit = tk.Button(
+            on_demand_tab,
+            font=("Arial", 12),
+            text="Submit Files",
+            command=lambda: self.action_performed("submit-on-demand"),
+            bg="gray",
+            height="5",
+            width="70",
+            justify="left"
+        )
+        submit.grid(row=3, columnspan=2, padx=2, pady=2)
+
 
     def action_performed(self, text: str) -> None:
         """Performs an action given a string.
@@ -408,6 +494,36 @@ class TabPanel(tk.Frame):
                 self.zoom_label.configure(text="You must select a file!")
             if self.__webinar_file is None:
                 self.webinar_label.configure(text="You must select a file!")
+        elif text == "attend-file":
+            self.__attend_file = self.browse_for_file("Browse for attendance.csv file")
+            self.terminal.print_message(f"Attendance file: {self.__attend_file} selected.")
+            filename = self.__attend_file.split("/")[-1]
+            self.attend_label.configure(text="{} selected.".format(filename))
+            self.terminal.print_message(f"Attendance file: {filename} selected.")
+        elif text == "eval-file":
+            self.__eval_file = self.browse_for_file("Browse for evaluation.csv file")
+            filename = self.__eval_file.split("/")[-1]
+            self.eval_label.configure(text="{} selected.".format(filename))
+            self.terminal.print_message(f"Evaluation file: {filename} selected.")
+        elif text == "on-demand-file":
+            self.__on_demand_file = self.browse_for_file("Browse for on-demand-reference.xlsx file")
+            filename = self.__on_demand_file.split("/")[-1]
+            self.on_demand_label.configure(text="{} selected.".format(filename))
+            self.terminal.print_message(f"On-Demand Reference file: {filename} selected.")
+        elif text == "submit-on-demand":
+            if self.__attend_file is not None and self.__eval_file is not None and self.__on_demand_file is not None:
+                try:
+                    self.terminal.print_message(f"On-Demand Report generation started . . .")
+                    create_on_demand_report(self.__attend_file, self.__eval_file, self.__on_demand_file)
+                    self.terminal.print_message(f". . . On-Demand Report generation finished!")
+                except Exception as e:
+                    self.terminal.print_message(f"Unknown Error: Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")
+            if self.__attend_file is None:
+                self.attend_label.configure(text="You must select a file!")
+            if self.__eval_file is None:
+                self.eval_label.configure(text="You must select a file!")
+            if self.__on_demand_file is None:
+                self.on_demand_label.configure(text="You must select a file!")
         else:
             pass
 
@@ -416,8 +532,8 @@ class TabPanel(tk.Frame):
             title=title,
         )
 
-    def reset_labels(self):
-        self.__webinar_file = None
-        self.__zoom_file = None
-        self.webinar_label.configure(text="No File Selected.")
-        self.zoom_label.configure(text="No File Selected.")
+    # def reset_labels(self):
+    #     self.__webinar_file = None
+    #     self.__zoom_file = None
+    #     self.webinar_label.configure(text="No File Selected.")
+    #     self.zoom_label.configure(text="No File Selected.")
