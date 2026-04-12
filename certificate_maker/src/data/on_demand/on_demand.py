@@ -281,40 +281,42 @@ def create_on_demand_report(
     del evaluation_df  # Free memory
 
     # Now we need to compare the report entries to the reference file to find the course ID and hours for each ent
-    for entry in report_entries:
-        # Check that we have evaluation data for the entry, if not raise error
-        if entry.course_evaluation is None:
-            raise MissingEvaluationData(entry.email, entry.course_title)
-        
+    for entry in report_entries:       
         # Iterate through each sheet in the reference file to find a matching course title and evaluation
         found_match = False
-        sheet_name = f"{entry.state} - Yes"  # Sheet name format is "State - Yes"
 
-        if sheet_name in pd.ExcelFile(reference_file).sheet_names:
-            try:
-                sheet_df = pd.read_excel(reference_file, sheet_name=sheet_name, skiprows=2)
-                sheet_df["Course Title"]
-            except Exception:
-                sheet_df = pd.read_excel(reference_file, sheet_name=sheet_name, skiprows=3)
-
-            # Find the last row where Course Title matches the course's title
-            matches = sheet_df[sheet_df["Course Title"].str.strip() == entry.course_title.strip()]
-
-            if not matches.empty:
-                last_match = matches.iloc[-1]
-                entry.course_id = last_match.get("Course Number")
-                entry.course_hours = last_match.get("Credit Received")
-
-                expiration_date = last_match.get("Expires")
-                if expiration_date is None or expiration_date == "None":
-                    pass
-                else:
-                    if expiration_date < entry.course_completed_date:
-                        entry.course_expired = True
-            else:
-                raise ReferenceFileMissingCourse(entry.course_title, sheet_name)
-        else:
+        excel_file = pd.ExcelFile(reference_file)
+        sheet_name = None
+        for available_sheet in excel_file.sheet_names:
+            if isinstance(available_sheet, str) and available_sheet.startswith(entry.state):
+                sheet_name = available_sheet
+                break
+        
+        if sheet_name is None:
             raise ReferenceFileMissingSheet(entry.state)
+
+        try:
+            sheet_df = pd.read_excel(reference_file, sheet_name=sheet_name, skiprows=2)
+            sheet_df["Course Title"]
+        except Exception:
+            sheet_df = pd.read_excel(reference_file, sheet_name=sheet_name, skiprows=3)
+
+        # Find the last row where Course Title matches the course's title
+        matches = sheet_df[sheet_df["Course Title"].str.strip() == entry.course_title.strip()]
+
+        if not matches.empty:
+            last_match = matches.iloc[-1]
+            entry.course_id = last_match.get("Course Number")
+            entry.course_hours = last_match.get("Credit Received")
+
+            expiration_date = last_match.get("Expires")
+            if expiration_date is None or pd.isna(expiration_date):
+                entry.course_expired = False
+            else:
+                if expiration_date < entry.course_completed_date:
+                    entry.course_expired = True
+        else:
+            raise ReferenceFileMissingCourse(entry.course_title, sheet_name)
         
     # At this point, all report entries should have course ID and hours populated. We can now generate the report.
     _export_to_excel(report_entries)

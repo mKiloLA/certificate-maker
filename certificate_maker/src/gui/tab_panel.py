@@ -268,7 +268,7 @@ class TabPanel(tk.Frame):
         attend_file = tk.Button(
             on_demand_tab,
             font=("Arial", 10),
-            text="Browse for Attendance File",
+            text="Browse for Submission File",
             command=lambda: self.action_performed("attend-file"),
             bg="light gray",
             height=5,
@@ -481,11 +481,11 @@ class TabPanel(tk.Frame):
             if self.__webinar_file is None:
                 self.webinar_label.configure(text="You must select a file!")
         elif text == "attend-file":
-            self.__attend_file = self.browse_for_file("Browse for attendance.csv file")
-            self.terminal.print_message(f"Attendance file: {self.__attend_file} selected.")
+            self.__attend_file = self.browse_for_file("Browse for submission.csv file")
+            self.terminal.print_message(f"Submission file: {self.__attend_file} selected.")
             filename = self.__attend_file.split("/")[-1]
             self.attend_label.configure(text="{} selected.".format(filename))
-            self.terminal.print_message(f"Attendance file: {filename} selected.")
+            self.terminal.print_message(f"Submission file: {filename} selected.")
         elif text == "eval-file":
             self.__eval_file = self.browse_for_file("Browse for evaluation.csv file")
             filename = self.__eval_file.split("/")[-1]
