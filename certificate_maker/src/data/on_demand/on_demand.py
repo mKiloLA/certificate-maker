@@ -312,7 +312,7 @@ def create_on_demand_report(
                     if expiration_date < entry.course_completed_date:
                         entry.course_expired = True
             else:
-                raise ReferenceFileMissingCourse((sheet_name, entry.course_title))
+                raise ReferenceFileMissingCourse(entry.course_title, sheet_name)
         else:
             raise ReferenceFileMissingSheet(entry.state)
         

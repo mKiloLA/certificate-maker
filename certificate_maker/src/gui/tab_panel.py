@@ -509,16 +509,13 @@ class TabPanel(tk.Frame):
                 except IncorrectDateTimeFormat as e:
                     self.terminal.print_message(f"Check time format: Failed to parse time information for `{e}`.")
                 except ReferenceFileMissingSheet as e:
-                    self.terminal.print_message(f"Check On-Demand Reference File: There is no sheet named `{e}` in the reference file.")
+                    self.terminal.print_message(f"Check On-Demand Reference File: There is no sheet named `{e.args[0]}` in the reference file.")
                 except MissingSubmissionData as e:
-                    if isinstance(e, tuple):
-                        self.terminal.print_message(f"Submission Report missing data: `{e[0]}` is missing required data for course `{e[1]}`.")
+                    self.terminal.print_message(f"Submission Report missing data: `{e.args[0]}` is missing required data for course `{e.args[1]}`.")
                 except MissingEvaluationData as e:
-                    if isinstance(e, tuple):
-                        self.terminal.print_message(f"Evaluation Report missing data: `{e[0]}` is missing required data for course `{e[1]}`.")
+                    self.terminal.print_message(f"Evaluation Report missing data: `{e.args[0]}` is missing required data for course `{e.args[1]}`.")
                 except ReferenceFileMissingCourse as e:
-                    if isinstance(e, tuple):
-                        self.terminal.print_message(f"Check On-Demand Reference File: There is no course titled `{e[0]}` in the reference file for the state of `{e[1]}`.")
+                    self.terminal.print_message(f"Check On-Demand Reference File: There is no course titled `{e.args[0]}` in the reference file for the state of `{e.args[1]}`.")
                 except Exception as e:
                     self.terminal.print_message(f"Unknown Error: Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")
             if self.__attend_file is None:
