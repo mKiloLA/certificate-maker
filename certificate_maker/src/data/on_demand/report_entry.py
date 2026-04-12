@@ -1,3 +1,6 @@
+from pandas import Timestamp
+
+
 class ReportEntry:
     """Class to represent an an entry on the On-Demand Report."""
 
@@ -9,7 +12,7 @@ class ReportEntry:
         self.__state : str = state
         self.__bar_number : str = bar_number
         self.__course_title : str = course_title
-        self.__course_completed_date : str = course_completed_date
+        self.__course_completed_date : Timestamp = course_completed_date
 
         # Obtained from the Evaluation file
         self.__course_evaluation : str | None = None
@@ -17,6 +20,7 @@ class ReportEntry:
         # Found by comparing the on-demand reference file to the attendance and evaluation files
         self.__course_id : str | None = None
         self.__course_hours : str | None = None
+        self.__course_expired : bool = False
 
     @property
     def name(self):
@@ -102,3 +106,11 @@ class ReportEntry:
     @course_hours.setter
     def course_hours(self, course_hours):
         self.__course_hours = course_hours
+
+    @property
+    def course_expired(self):
+        return self.__course_expired
+
+    @course_expired.setter
+    def course_expired(self, course_expired):
+        self.__course_expired = course_expired

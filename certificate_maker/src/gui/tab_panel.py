@@ -10,21 +10,7 @@ from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.data.on_demand.on_demand import create_on_demand_report
 from certificate_maker.src.data.pdf_flatten import pdf_flatten
-from certificate_maker.src.exception_types import (
-    IncorrectWebinarTitle,
-    AttorneyMissingBarNumber,
-    IncorrectDateTimeFormat,
-    MasterListMissingHours,
-    MissingStateApproval,
-    AttorneyMissingState,
-    IncorrectNumberOfBreaks,
-    IncorrectBreakDate,
-    AttorneyInvalidState,
-    AttorneyInvalidBarNumber,
-    MissingBreakRow,
-    MissingStartRow,
-    MismatchingStateAndBarNumbers
-)
+from certificate_maker.src.exception_types import *
 
 
 class TabPanel(tk.Frame):
@@ -38,9 +24,9 @@ class TabPanel(tk.Frame):
         self.__zoom_file = None
         self.__webinar_file = None
         self.__json_file = None
-        self.__attend_file = "/Users/zakoster/Downloads/01012026-01112026, Freestone Credit Submission Report.csv"
-        self.__eval_file = "/Users/zakoster/Downloads/01012026-01112026, Freestone Course Evaluation Report.csv"
-        self.__on_demand_file = "/Users/zakoster/Downloads/On-Demand CLE Class Approvals, As of 04022026.xlsx"
+        self.__attend_file = None
+        self.__eval_file = None
+        self.__on_demand_file = None
         self.terminal = terminal
 
         self.__loading_tabs: ttk.Notebook = ttk.Notebook(master=self)
@@ -516,6 +502,23 @@ class TabPanel(tk.Frame):
                     self.terminal.print_message(f"On-Demand Report generation started . . .")
                     create_on_demand_report(self.__attend_file, self.__eval_file, self.__on_demand_file)
                     self.terminal.print_message(f". . . On-Demand Report generation finished!")
+                except MalformedEvaluationQuestionResponse as e:
+                    self.terminal.print_message(f"Check Evaluation Question Responses: `{e}` has a malformed response to an evaluation question.")
+                except MalformedCROString as e:
+                    self.terminal.print_message(f"Check Submitted CRO cell on Submission Report: `{e}` has a CRO string that is not in the format `State: BarNumber - Hours`.")
+                except IncorrectDateTimeFormat as e:
+                    self.terminal.print_message(f"Check time format: Failed to parse time information for `{e}`.")
+                except ReferenceFileMissingSheet as e:
+                    self.terminal.print_message(f"Check On-Demand Reference File: There is no sheet named `{e}` in the reference file.")
+                except MissingSubmissionData as e:
+                    if isinstance(e, tuple):
+                        self.terminal.print_message(f"Submission Report missing data: `{e[0]}` is missing required data for course `{e[1]}`.")
+                except MissingEvaluationData as e:
+                    if isinstance(e, tuple):
+                        self.terminal.print_message(f"Evaluation Report missing data: `{e[0]}` is missing required data for course `{e[1]}`.")
+                except ReferenceFileMissingCourse as e:
+                    if isinstance(e, tuple):
+                        self.terminal.print_message(f"Check On-Demand Reference File: There is no course titled `{e[0]}` in the reference file for the state of `{e[1]}`.")
                 except Exception as e:
                     self.terminal.print_message(f"Unknown Error: Email the files and the following error message to Zak so he can add error checks for it in the future: `{e}`")
             if self.__attend_file is None:
@@ -531,9 +534,3 @@ class TabPanel(tk.Frame):
         return filedialog.askopenfilename(
             title=title,
         )
-
-    # def reset_labels(self):
-    #     self.__webinar_file = None
-    #     self.__zoom_file = None
-    #     self.webinar_label.configure(text="No File Selected.")
-    #     self.zoom_label.configure(text="No File Selected.")

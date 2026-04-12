@@ -9,3 +9,6 @@ __pycache__
 /dist
 .pylintrc
 .DS_Store
+icon.iconset/
+CertificateMaker.dmg
+icon.png

@@ -52,5 +52,5 @@ class MalformedEvaluationQuestionResponse(Exception):
 class ReferenceFileMissingSheet(Exception):
     pass
 
-class RefereneFileMissingCourse(Exception):
+class ReferenceFileMissingCourse(Exception):
     pass
