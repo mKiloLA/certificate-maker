@@ -1,7 +1,9 @@
 import os
 import json
 import shutil
-import smtplib, ssl
+import smtplib
+import ssl
+import certifi
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -24,7 +26,7 @@ def send_emails(json_filepath, demo=True):
         sender_email = reader.readline().strip()
         password = reader.readline().strip()
 
-    context = ssl.create_default_context()
+    context = ssl.create_default_context(cafile=certifi.where())
     with smtplib.SMTP("smtp.office365.com", 587) as server:
         server.starttls(context=context)
         server.login(sender_email, password)

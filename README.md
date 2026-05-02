@@ -42,7 +42,13 @@ iconutil -c icns icon.iconset
 Then, run the following command to build the app:
 
 ```bash
-pyinstaller certificate_maker/__main__.py --name CertificateMaker --paths . --onedir --noconfirm --noconsole --icon=icon.icns --collect-all selenium
+pyinstaller certificate_maker/__main__.py --name CertificateMaker --paths . --onedir --noconfirm --noconsole --icon=icon.icns --collect-all selenium --collect-all certifi
+```
+
+or build from the spec file:
+
+```bash
+pyinstaller --noconfirm --clean CertificateMaker.spec
 ```
 
 Optionally, if you want to create an installer:
