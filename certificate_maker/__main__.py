@@ -1,7 +1,6 @@
 from certificate_maker.src.gui.primary_window import PrimaryWindow
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.data.emails import send_emails
-from certificate_maker.src.data.pdf_flatten import pdf_flatten
 import logging
 from os import path
 

@@ -3,7 +3,6 @@ setuptools
 pandas
 openpyxl
 pillow
-selenium
 pytest
 black
 pyinstaller

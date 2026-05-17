@@ -15,16 +15,13 @@ def create_certificates(zoom_file, webinar_file, create=True):
     date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
     cle_name = webinar.cle_class.cle_name
 
-    output_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim} {cle_name.replace(':', '')}/")
     desired_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim}, {cle_name.replace(':', '-')}/")
-    json_filename = os.path.join(output_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
+    json_filename = os.path.join(desired_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
 
     if create:
-        os.makedirs(output_filename, exist_ok=True)
         os.makedirs(desired_filename, exist_ok=True)
 
     serialization_dict = {
-        "filepath": output_filename,
         "desiredpath": desired_filename
     }
     attendee_list = []
@@ -50,18 +47,30 @@ def create_certificates(zoom_file, webinar_file, create=True):
             first_name_list = []
             overflow_name_list = []
             total_length = 0
+            overflow_character_count = 0
+            max_line_length = 30
+
             for name in og_name_list:
-                if total_length + len(name) >= 30:
-                    overflow_name_list.append(name)
-                    total_length += len(name)
+                if total_length + len(name) > max_line_length:
+                    if overflow_character_count + len(name) > max_line_length:
+                        overflow_name_list.append("...")
+                        break
+                    else:
+                        overflow_name_list.append(name)
+                        overflow_character_count += len(name)
+                        total_length += len(name)
                 else:
                     first_name_list.append(name)
                     total_length += len(name)
             name_1 = " ".join(first_name_list)
             name_2 = " ".join(overflow_name_list)
 
+            # Give grace if the person missed less than 0.1 hours
             rounded_hours = float(round_hours(person.total_time, state))
             total_approved_time = float(approval_information[1])
+            if round(abs(rounded_hours - total_approved_time), 2) <= 0.1:
+                rounded_hours = total_approved_time
+
             print(f"Rounded: {rounded_hours}, Approved: {total_approved_time}")
 
             # create a dictionary holding all the attendee information
@@ -69,7 +78,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 "name": person.name,
                 "state": state,
                 "barnumber": f"#{person.bar_numbers[index]}",
-                "attendedhours": f"{float(round_hours(person.total_time, state)) if float(round_hours(person.total_time, state)) < float(approval_information[1]) else float(approval_information[1]):.2f}",
+                "attendedhours": f"{rounded_hours if rounded_hours < total_approved_time else total_approved_time:.2f}",
                 "cledate": webinar.cle_class.cle_date.strftime("%B %d, %Y"),
                 "totalhours": approval_information[1],
                 "coursenumber": f"#{approval_information[0]}",
@@ -89,19 +98,19 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 fields = reader.get_fields()
                 writer.append(reader)
                 writer.update_page_form_field_values(
-                    writer.get_page(0), certificate_data, 1
+                    writer.get_page(0), certificate_data, flatten=True
                 )
+                writer.remove_annotations(None)
 
                 first_name = person.first_name
                 last_name = person.last_name
 
                 # add rows to certificate data for serialization
-                certificate_data["filename"] = os.path.join(desired_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf")
                 certificate_data["desiredname"] = os.path.join(desired_filename, f"{last_name}, {first_name}, {us_state_to_abbrev[state]} #{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf")
                 attendee_list.append(certificate_data)
 
                 with open(
-                    os.path.join(output_filename, f"{last_name} {first_name} {person.bar_numbers[index]}.pdf"),
+                    certificate_data["desiredname"],
                     "wb",
                 ) as output_stream:
                     writer.write(output_stream)

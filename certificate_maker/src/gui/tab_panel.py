@@ -9,7 +9,6 @@ from tkinter import ttk, filedialog
 from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.data.on_demand.on_demand import create_on_demand_report
-from certificate_maker.src.data.pdf_flatten import pdf_flatten
 from certificate_maker.src.exception_types import *
 
 
@@ -38,14 +37,12 @@ class TabPanel(tk.Frame):
 
         self.__loading_tabs.add(verification_tab, text="Verify")
         self.__loading_tabs.add(create_tab, text="Create Certificates")
-        self.__loading_tabs.add(flatten_tab, text="PDF Flatten")
         self.__loading_tabs.add(email_tab, text="Send Emails")
         self.__loading_tabs.add(on_demand_tab, text="On-Demand")
         self.__loading_tabs.pack(expand=1, fill="both")
 
         verification_tab.grid_columnconfigure(0, weight=1)
         create_tab.grid_columnconfigure(0, weight=1)
-        flatten_tab.grid_columnconfigure(0, weight=1)
         email_tab.grid_columnconfigure(0, weight=1)
         on_demand_tab.grid_columnconfigure(0, weight=1)
 
@@ -168,44 +165,6 @@ class TabPanel(tk.Frame):
             justify="left"
         )
         submit.grid(row=2, columnspan=2, padx=2, pady=2)                                                                                                            
-
-        # ----- Create the pdf_flatten Tab -----
-
-        flatten_tab.grid_rowconfigure(0, weight=1)
-        flatten_tab.grid_rowconfigure(1, weight=1)
-
-        flatten_tab.grid_columnconfigure(0, weight=1, minsize=150)
-        flatten_tab.grid_columnconfigure(1, weight=1, minsize=150)
-
-        json_file = tk.Button(
-            flatten_tab,
-            font=("Arial", 10),
-            text="Browse for Webinar JSON file",
-            command=lambda: self.action_performed("find_json"),
-            bg="light gray",
-            height=5,
-            width=20
-        )
-        json_file.grid(row=0, column=0, padx=2, pady=2)
-
-        self.json_label = tk.Label(
-            master=flatten_tab,
-            text="No File Selected",
-            font=("Arial", 12),
-            justify="left",
-        )
-        self.json_label.grid(row=0, column=1, padx=2, pady=2)
-
-        json_submit = tk.Button(
-            flatten_tab,
-            font=("Arial", 10),
-            text="Convert PDFs",
-            command=lambda: self.action_performed("flatten_pdf"),
-            bg="light gray",
-            height=5,
-            width=50
-        )
-        json_submit.grid(row=1, column=0, columnspan=2, padx=2, pady=2)
 
         # ----- Create the Send Emails Tab -----
         email_tab.grid_rowconfigure(0, weight=1)
@@ -366,7 +325,6 @@ class TabPanel(tk.Frame):
 
                     # Automatically select the json file
                     filename = self.__json_file.split("/")[-1]
-                    self.json_label.configure(text="{} selected.".format(filename))
                     self.email_json_label.configure(text="{} selected.".format(filename))
                     self.terminal.print_message(f"JSON file: {filename} selected.")
                 except IncorrectDateTimeFormat as e:
