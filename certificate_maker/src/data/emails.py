@@ -77,8 +77,6 @@ def send_emails(json_filepath, demo=True):
             message.attach(part)
             text = message.as_string()
             server.sendmail(sender_email, receiver_email, text)
-    if not demo:
-        shutil.rmtree(webinar_dict["filepath"])
 
 def make_body(attorney):
     bar_statement = ""

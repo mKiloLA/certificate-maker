@@ -20,7 +20,7 @@ The intended use of the program is through an application created by pyinstaller
 pyinstaller --noconfirm --clean CertificateMaker.spec
 ```
 
-Optionally, you can build the source with the following code:
+Optionally, you can build the source with the following steps.
 
 If you want to change the icon, do the following from root with an icon named `icon.png`.
 
