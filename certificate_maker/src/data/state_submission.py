@@ -10,6 +10,13 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 from certificate_maker.src.data.ref import us_state_to_abbrev
+from certificate_maker.src.exception_types import (
+    StateSubmissionFileNotFound,
+    StateSubmissionInvalidJson,
+    StateSubmissionMissingData,
+    StateSubmissionMissingPollData,
+    StateSubmissionMissingSurveyData,
+)
 
 
 REPORT_HEADERS = [
@@ -39,8 +46,11 @@ def _email(value: object) -> str:
 
 
 def _read_csv_rows(path: str) -> list[list[str]]:
-    with open(path, "r", newline="", encoding="utf-8-sig") as source:
-        return [row for row in csv.reader(source)]
+    try:
+        with open(path, "r", newline="", encoding="utf-8-sig") as source:
+            return [row for row in csv.reader(source)]
+    except FileNotFoundError as error:
+        raise StateSubmissionFileNotFound(path) from error
 
 
 def _add_csv_sheet(workbook: Workbook, title: str, path: str) -> None:
@@ -81,6 +91,10 @@ def _poll_participants(poll_file: str) -> list[set[str]]:
         participants.append(responses)
         index = header_index + 1
 
+    if not participants:
+        raise StateSubmissionMissingPollData(
+            "The Poll report does not contain any response sections."
+        )
     return participants
 
 
@@ -111,7 +125,9 @@ def _survey_responses(survey_file: str) -> dict[str, str]:
     rows = _read_csv_rows(survey_file)
     header_info = _find_header(rows, "User Name", "Email Address")
     if header_info is None:
-        return {}
+        raise StateSubmissionMissingSurveyData(
+            "The Survey report does not contain a respondent header."
+        )
 
     header_index, columns = header_info
     email_index = columns.index("Email Address")
@@ -183,12 +199,20 @@ def _identifier(value: object) -> int | str:
 
 
 def _json_rows(json_file: str) -> tuple[list[dict[str, object]], str, str]:
-    with open(json_file, "r", encoding="utf-8") as source:
-        document = json.load(source)
+    try:
+        with open(json_file, "r", encoding="utf-8") as source:
+            document = json.load(source)
+    except FileNotFoundError as error:
+        raise StateSubmissionFileNotFound(json_file) from error
+    except (json.JSONDecodeError, OSError) as error:
+        raise StateSubmissionInvalidJson(json_file) from error
+
+    if not isinstance(document, dict):
+        raise StateSubmissionInvalidJson(json_file)
 
     attendees = document.get("attendees", [])
     if not attendees:
-        return [], "", ""
+        raise StateSubmissionMissingData("The JSON file does not contain attendees.")
 
     first = attendees[0]
     title = f"{_clean(first.get('clename'))} {_clean(first.get('overflow'))}".strip()

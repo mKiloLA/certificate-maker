@@ -294,6 +294,7 @@ class TabPanel(tk.Frame):
                 assert self.__json_file is not None
                 assert self.__poll_file is not None
                 assert self.__zoom_survey_file is not None
+                assert self.__state_attendance_file is not None
                 try:
                     self.terminal.print_message("State submission report generation started . . .")
                     output_file = create_state_submission_report(
@@ -305,6 +306,16 @@ class TabPanel(tk.Frame):
                     self.terminal.print_message(
                         f". . . State submission report created: {output_file}"
                     )
+                except StateSubmissionFileNotFound as e:
+                    self.terminal.print_message(f"State Submission File Missing: `{e.args[0]}` was not found.")
+                except StateSubmissionInvalidJson as e:
+                    self.terminal.print_message(f"State Submission JSON Error: `{e.args[0]}` is not valid certificate JSON.")
+                except StateSubmissionMissingData as e:
+                    self.terminal.print_message(f"State Submission Data Error: `{e}`")
+                except StateSubmissionMissingPollData as e:
+                    self.terminal.print_message(f"State Submission Poll Error: `{e}`")
+                except StateSubmissionMissingSurveyData as e:
+                    self.terminal.print_message(f"State Submission Survey Error: `{e}`")
                 except Exception as e:
                     self.terminal.print_message(
                         f"Unknown Error: Could not create the state submission report: `{e}`"
