@@ -1,12 +1,12 @@
 from certificate_maker.src.gui.primary_window import PrimaryWindow
-from certificate_maker.src.data.certificate import create_certificates
-from certificate_maker.src.data.emails import send_emails
 import logging
 from os import path
 
 logging.basicConfig(
     filemode="w",
-    filename=path.join(path.expanduser('~'), "CertificateMaker/CertificatesToCheck.log"),
+    filename=path.join(
+        path.expanduser("~"), "CertificateMaker/CertificatesToCheck.log"
+    ),
     encoding="utf-8",
     level=logging.INFO,
     format="%(levelname)s:%(message)s",

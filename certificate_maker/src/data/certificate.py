@@ -4,9 +4,13 @@ from pypdf import PdfReader, PdfWriter
 from certificate_maker.src.data.webinar import Webinar
 import logging
 from datetime import date
+from typing import Any
 
-from certificate_maker.src.data.ref import states_dict, us_state_to_abbrev
-from certificate_maker.src.exception_types import MissingStateApproval, MismatchingStateAndBarNumbers
+from certificate_maker.src.data.ref import us_state_to_abbrev
+from certificate_maker.src.exception_types import (
+    MissingStateApproval,
+    MismatchingStateAndBarNumbers,
+)
 
 
 def create_certificates(zoom_file, webinar_file, create=True):
@@ -15,15 +19,20 @@ def create_certificates(zoom_file, webinar_file, create=True):
     date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
     cle_name = webinar.cle_class.cle_name
 
-    desired_filename = os.path.join(os.path.expanduser('~'), f"CertificateMaker/Webinar/{date_no_delim}, {cle_name.replace(':', '-')}/")
-    json_filename = os.path.join(desired_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
+    desired_filename = os.path.join(
+        os.path.expanduser("~"),
+        f"CertificateMaker/Webinar/{date_no_delim}, {cle_name.replace(':', '-')}/",
+    )
+    json_filename = os.path.join(
+        desired_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json"
+    )
 
     if create:
         os.makedirs(desired_filename, exist_ok=True)
 
-    serialization_dict = {
+    serialization_dict: dict[str, Any] = {
         "desiredpath": desired_filename,
-        "datecreated": date.today().strftime("%m/%d/%Y") + f", by CM",
+        "datecreated": date.today().strftime("%m/%d/%Y") + ", by CM",
     }
     attendee_list = []
 
@@ -33,16 +42,18 @@ def create_certificates(zoom_file, webinar_file, create=True):
         # Make sure there is one bar number for each state
         if len(person.bar_numbers) != len(person.states):
             raise MismatchingStateAndBarNumbers(person.name)
-        
+
         # Loop through each state in their profile. Make seperate certificates for each state
         for index, state in enumerate(person.states):
             # Check if the class is approved in that state, if not throw error
             try:
                 approval_information = webinar.cle_class.approvals[state]
             except:
-                logging.error(f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`.")
+                logging.error(
+                    f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`."
+                )
                 raise MissingStateApproval((person.name, state))
-            
+
             # Split the class name by spaces and then check lengths. This is to prevent overflow on pdf
             og_name_list = webinar.cle_class.cle_name.split(" ")
             first_name_list = []
@@ -89,15 +100,17 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
                 "email": person.email,
-                "phonenumber": person.phone_number
+                "phonenumber": person.phone_number,
             }
 
             if create:
                 # Write dictionary to pdf form located in users home directory
-                path_to_form = os.path.join(os.path.expanduser('~'), "CertificateMaker/References/certificate_form_empty.pdf")
+                path_to_form = os.path.join(
+                    os.path.expanduser("~"),
+                    "CertificateMaker/References/certificate_form_empty.pdf",
+                )
                 reader = PdfReader(path_to_form)
                 writer = PdfWriter()
-                fields = reader.get_fields()
                 writer.append(reader)
                 writer.update_page_form_field_values(
                     writer.get_page(0), certificate_data, flatten=True
@@ -108,7 +121,10 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 last_name = person.last_name
 
                 # add rows to certificate data for serialization
-                certificate_data["desiredname"] = os.path.join(desired_filename, f"{last_name}, {first_name}, {us_state_to_abbrev[state]} #{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf")
+                certificate_data["desiredname"] = os.path.join(
+                    desired_filename,
+                    f"{last_name}, {first_name}, {us_state_to_abbrev[state]} #{person.bar_numbers[index]}, COL Certificate of Attendance, {date_no_delim}.pdf",
+                )
                 attendee_list.append(certificate_data)
 
                 with open(
@@ -123,6 +139,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
         with open(json_filename, "w") as outfile:
             outfile.write(json_object)
         return json_filename
+
 
 def round_hours(total_time, state):
     """Round the attended hours according to state guidelines."""

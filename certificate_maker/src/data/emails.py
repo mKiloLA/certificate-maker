@@ -1,6 +1,5 @@
 import os
 import json
-import shutil
 import smtplib
 import ssl
 import certifi
@@ -8,6 +7,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 
 class AttorneyEmail:
     def __init__(self, name, state, email, clename, cledate):
@@ -17,12 +17,16 @@ class AttorneyEmail:
         self.clename = clename
         self.cledate = cledate
 
+
 def send_emails(json_filepath, demo=True):
     # Open json file the information
-    with open(json_filepath, 'r') as openfile:
+    with open(json_filepath, "r") as openfile:
         webinar_dict = json.load(openfile)
 
-    with open(os.path.join(os.path.expanduser('~'), "Certificates/References/Outlook.txt"), "r") as reader:
+    with open(
+        os.path.join(os.path.expanduser("~"), "Certificates/References/Outlook.txt"),
+        "r",
+    ) as reader:
         sender_email = reader.readline().strip()
         password = reader.readline().strip()
 
@@ -39,7 +43,7 @@ def send_emails(json_filepath, demo=True):
                 state=attendee["state"],
                 email=attendee["email"],
                 clename=f"{attendee['clename']} {attendee['overflow']}",
-                cledate=attendee["cledate"]
+                cledate=attendee["cledate"],
             )
 
             body = make_body(person)
@@ -64,7 +68,7 @@ def send_emails(json_filepath, demo=True):
                 part = MIMEBase("application", "octet-stream")
                 part.set_payload(attachment.read())
 
-            # Encode file in ASCII characters to send by email    
+            # Encode file in ASCII characters to send by email
             encoders.encode_base64(part)
 
             # Add header as key/value pair to attachment part
@@ -77,6 +81,7 @@ def send_emails(json_filepath, demo=True):
             message.attach(part)
             text = message.as_string()
             server.sendmail(sender_email, receiver_email, text)
+
 
 def make_body(attorney):
     bar_statement = ""

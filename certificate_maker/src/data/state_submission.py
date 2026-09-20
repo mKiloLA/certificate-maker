@@ -1,13 +1,16 @@
 """Create state-submission workbooks from webinar exports."""
+
 from builtins import object
 import csv
 import json
 import os
 import re
-from typing import Iterable
+from typing import Iterable, cast
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 from certificate_maker.src.data.ref import us_state_to_abbrev
 from certificate_maker.src.exception_types import (
@@ -17,7 +20,6 @@ from certificate_maker.src.exception_types import (
     StateSubmissionMissingPollData,
     StateSubmissionMissingSurveyData,
 )
-
 
 REPORT_HEADERS = [
     "Total Hours",
@@ -36,6 +38,7 @@ REPORT_HEADERS = [
     "Paid",
     "Notes",
 ]
+
 
 def _clean(value: object) -> str:
     return "" if value is None else str(value).strip()
@@ -60,7 +63,9 @@ def _add_csv_sheet(workbook: Workbook, title: str, path: str) -> None:
         worksheet.append(row)
 
 
-def _find_header(rows: Iterable[list[str]], *required: str) -> tuple[int, list[str]] | None:
+def _find_header(
+    rows: Iterable[list[str]], *required: str
+) -> tuple[int, list[str]] | None:
     for index, row in enumerate(rows):
         if all(value in row for value in required):
             return index, row
@@ -82,7 +87,7 @@ def _poll_participants(poll_file: str) -> list[set[str]]:
         email_index = columns.index("Email Address")
         responses: set[str] = set()
 
-        for row in rows[header_index + 1:]:
+        for row in rows[header_index + 1 :]:
             if not any(_clean(value) for value in row):
                 break
             if len(row) > email_index and _email(row[email_index]):
@@ -99,7 +104,9 @@ def _poll_participants(poll_file: str) -> list[set[str]]:
 
 
 def _poll_summary(email: str, participants: list[set[str]]) -> str:
-    answered = [str(number) for number, people in enumerate(participants, 1) if email in people]
+    answered = [
+        str(number) for number, people in enumerate(participants, 1) if email in people
+    ]
     if not answered:
         return "Did Not Respond"
     if len(answered) == len(participants):
@@ -138,7 +145,7 @@ def _survey_responses(survey_file: str) -> dict[str, str]:
     ]
     responses: dict[str, str] = {}
 
-    for row in rows[header_index + 1:]:
+    for row in rows[header_index + 1 :]:
         if not any(_clean(value) for value in row):
             break
         if len(row) <= email_index:
@@ -220,7 +227,7 @@ def _json_rows(json_file: str) -> tuple[list[dict[str, object]], str, str]:
     return attendees, title, date
 
 
-def _format_state_submission_sheet(worksheet) -> None:
+def _format_state_submission_sheet(worksheet: Worksheet) -> None:
     """Apply the formatting used by the webinar worksheet report."""
     title_alignment = Alignment(horizontal="centerContinuous")
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -245,7 +252,9 @@ def _format_state_submission_sheet(worksheet) -> None:
         cell.alignment = header_alignment
 
     centered_columns = {1, 6, 7, 8, 9, 10, 11, 12, 13, 14}
-    for row in worksheet.iter_rows(min_row=5, max_row=worksheet.max_row, max_col=len(REPORT_HEADERS)):
+    for row in worksheet.iter_rows(
+        min_row=5, max_row=worksheet.max_row, max_col=len(REPORT_HEADERS)
+    ):
         if not any(cell.value not in (None, "") for cell in row):
             for cell in row:
                 cell.fill = separator_fill
@@ -253,13 +262,20 @@ def _format_state_submission_sheet(worksheet) -> None:
         for column, cell in enumerate(row, start=1):
             cell.font = Font(name="Arial", size=12)
             cell.border = thin_border
-            cell.alignment = centered if column in centered_columns else Alignment(vertical="center")
+            cell.alignment = (
+                centered if column in centered_columns else Alignment(vertical="center")
+            )
             if column in {7, 8} and isinstance(cell.value, str):
                 cell.number_format = "@"
 
-    for column_cells in worksheet.iter_cols(min_row=1, max_row=worksheet.max_row, max_col=len(REPORT_HEADERS)):
+    for column_index, column_cells in enumerate(
+        worksheet.iter_cols(
+            min_row=1, max_row=worksheet.max_row, max_col=len(REPORT_HEADERS)
+        ),
+        start=1,
+    ):
         width = max(len(_clean(cell.value)) for cell in column_cells) + 2
-        worksheet.column_dimensions[column_cells[0].column_letter].width = width
+        worksheet.column_dimensions[get_column_letter(column_index)].width = width
 
     worksheet.freeze_panes = "A5"
     worksheet.auto_filter.ref = f"A4:O{worksheet.max_row}"
@@ -281,7 +297,7 @@ def create_state_submission_report(
     survey_responses = _survey_responses(survey_file)
 
     workbook = Workbook()
-    worksheet = workbook.active
+    worksheet = cast(Worksheet, workbook.active)
     worksheet.title = "State Submissions"
     worksheet.append([title])
     worksheet.append([date])
@@ -292,25 +308,29 @@ def create_state_submission_report(
     for attendee in attendees:
         first_name, last_name = _split_name(attendee.get("name"))
         respondent = _email(attendee.get("email"))
-        report_rows.append([
-            _total_hours(attendee),
-            last_name,
-            first_name,
-            attendee.get("email", ""),
-            _format_phone(attendee.get("phonenumber")),
-            _state_abbreviation(attendee.get("state")),
-            _identifier(attendee.get("barnumber")),
-            _identifier(attendee.get("coursenumber")),
-            _poll_summary(respondent, poll_participants),
-            survey_responses.get(respondent, "Did Not Respond"),
-            _certificate_date(attendee.get("certifieddate")),
-            "",
-            "",
-            "",
-            "",
-        ])
+        report_rows.append(
+            [
+                _total_hours(attendee),
+                last_name,
+                first_name,
+                attendee.get("email", ""),
+                _format_phone(attendee.get("phonenumber")),
+                _state_abbreviation(attendee.get("state")),
+                _identifier(attendee.get("barnumber")),
+                _identifier(attendee.get("coursenumber")),
+                _poll_summary(respondent, poll_participants),
+                survey_responses.get(respondent, "Did Not Respond"),
+                _certificate_date(attendee.get("certifieddate")),
+                "",
+                "",
+                "",
+                "",
+            ]
+        )
 
-    report_rows.sort(key=lambda row: (row[5].casefold(), row[1].casefold(), row[2].casefold()))
+    report_rows.sort(
+        key=lambda row: (row[5].casefold(), row[1].casefold(), row[2].casefold())
+    )
     previous_state = None
     for report_row in report_rows:
         current_state = report_row[5]

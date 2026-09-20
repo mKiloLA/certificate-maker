@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Python: Format",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "black",
+                "certificate_maker"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Python: Format Check",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "black",
+                "--check",
+                "certificate_maker"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Python: Lint",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "pyflakes",
+                "certificate_maker"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Python: Quality Check",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Python: Format Check",
+                "Python: Lint"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

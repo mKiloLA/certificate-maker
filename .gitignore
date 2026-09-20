@@ -3,7 +3,6 @@
 *.log
 Certificates/Output\ Certificates
 /.venv
-/.vscode
 __pycache__
 /build
 /dist

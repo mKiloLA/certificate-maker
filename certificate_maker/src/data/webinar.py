@@ -10,7 +10,7 @@ from certificate_maker.src.exception_types import (
     IncorrectNumberOfBreaks,
     IncorrectBreakDate,
     MissingBreakRow,
-    MissingStartRow
+    MissingStartRow,
 )
 
 
@@ -88,9 +88,17 @@ class Webinar:
                     string_to_datetime(attorney["Leave Time"]),
                 ],
                 # CHANGE
-                state=[str(attorney["Bar State #1"]).strip(), str(attorney["Bar State #2"]).strip(), str(attorney["Bar State #3"]).strip()],
-                bar_number=[str(attorney["Bar Number #1"]).strip(), str(attorney["Bar Number #2"]).strip(), str(attorney["Bar Number #3"]).strip()],
-                phone_number=attorney["Phone"].strip()
+                state=[
+                    str(attorney["Bar State #1"]).strip(),
+                    str(attorney["Bar State #2"]).strip(),
+                    str(attorney["Bar State #3"]).strip(),
+                ],
+                bar_number=[
+                    str(attorney["Bar Number #1"]).strip(),
+                    str(attorney["Bar Number #2"]).strip(),
+                    str(attorney["Bar Number #3"]).strip(),
+                ],
+                phone_number=attorney["Phone"].strip(),
             )
 
             if new_attorney in self.__attendees:
@@ -138,21 +146,19 @@ class Webinar:
 
                     # If no breaks are put in, assume 0 breaks
                     num_of_breaks = int(line[1]) if line[1].isdigit() else 0
-                    
+
                     # get the breaks. line[1] has the number of breaks
                     for j in range(2, 2 * num_of_breaks + 1, 2):
                         # first time is start of break, second is end of break
                         try:
                             break_start = string_to_datetime(line[j])
                             break_end = string_to_datetime(line[j + 1])
-                            if not (break_start.date()==cle_date and break_end.date()==cle_date):
+                            if not (
+                                break_start.date() == cle_date
+                                and break_end.date() == cle_date
+                            ):
                                 raise IncorrectBreakDate
-                            self.__breaks.append(
-                                [
-                                    break_start,
-                                    break_end
-                                ]
-                            )
+                            self.__breaks.append([break_start, break_end])
                         except IncorrectDateTimeFormat as e:
                             # if string is empty, then not enough times were given
                             if str(e) == "":
@@ -171,7 +177,7 @@ class Webinar:
             raise MissingStartRow
         elif not has_breaks:
             raise MissingBreakRow
-        
+
         # load the file into a df
         zoom_data = pd.read_csv(zoom_file_path, skiprows=rows_to_skip, index_col=False)
 
@@ -252,8 +258,12 @@ def string_to_datetime(time):
                                     time = datetime.strptime(time, "%b %d, %Y %H:%M:%S")
                                 except:
                                     try:
-                                        time = datetime.strptime(time, "%b %d, %Y %I:%M:%S")
+                                        time = datetime.strptime(
+                                            time, "%b %d, %Y %I:%M:%S"
+                                        )
                                     except:
-                                        logging.error(f"Failed to parse time information for `{time}`.")
+                                        logging.error(
+                                            f"Failed to parse time information for `{time}`."
+                                        )
                                         raise IncorrectDateTimeFormat(time)
     return time.replace(second=0, microsecond=0)

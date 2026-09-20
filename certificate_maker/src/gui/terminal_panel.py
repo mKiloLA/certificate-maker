@@ -1,15 +1,11 @@
 """Class to display terminal outputs.
 
-Author: Zak Oster zcoster@ksu.edu
+Author: Zak Oster zc9oster@gmail.com
 Version: 0.1
 """
-import tkinter as tk
-from tkinter import ttk, filedialog, scrolledtext
-from PIL import ImageTk, Image
-from threading import Thread, Event
-from time import sleep
 
-from certificate_maker.src.data.certificate import create_certificates
+import tkinter as tk
+from tkinter import ttk, scrolledtext
 
 
 class TerminalPanel(tk.Frame):
@@ -23,14 +19,12 @@ class TerminalPanel(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         self.terminal = scrolledtext.ScrolledText(
-            self,
-            wrap=tk.WORD,
-            font=("Arial", 14)
+            self, wrap=tk.WORD, font=("Arial", 14)
         )
         self.terminal.grid(row=0, column=0, padx=2, pady=2, sticky="NSEW")
         self.terminal.insert(tk.INSERT, "Program Output:\n")
-        self.terminal.configure(state ="disabled")
-    
+        self.terminal.configure(state="disabled")
+
     def print_message(self, message):
         self.terminal.configure(state="normal")
         self.terminal.insert(tk.INSERT, f"\n{message}\n")

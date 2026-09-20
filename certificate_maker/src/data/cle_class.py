@@ -2,7 +2,10 @@ from openpyxl import load_workbook
 from certificate_maker.src.data.ref import states_dict, new_york_approvals
 import logging
 
-from certificate_maker.src.exception_types import MasterListMissingHours, IncorrectWebinarTitle
+from certificate_maker.src.exception_types import (
+    MasterListMissingHours,
+    IncorrectWebinarTitle,
+)
 
 
 class CleClass:
@@ -48,7 +51,9 @@ class CleClass:
             self.__approved_jurisdictions()
             self.__parse_credit_type()
         else:
-            logging.error(f"There are no CLEs matching `{self.cle_name}`. Please make sure the webinar has the correct title.")
+            logging.error(
+                f"There are no CLEs matching `{self.cle_name}`. Please make sure the webinar has the correct title."
+            )
             raise IncorrectWebinarTitle(self.cle_name)
 
     def __approved_jurisdictions(self):
@@ -78,5 +83,7 @@ class CleClass:
                 ", ".join(parsed_credits),
             ]
             if total_hours == 0:
-                logging.error(f"Check Master CLE List: CLE list is missing total hours in `{key}`.")
+                logging.error(
+                    f"Check Master CLE List: CLE list is missing total hours in `{key}`."
+                )
                 raise MasterListMissingHours(key)

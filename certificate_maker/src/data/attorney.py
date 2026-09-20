@@ -1,20 +1,19 @@
 from datetime import timedelta
 from certificate_maker.src.data.ref import states_abbrev, states_full, states_dict
-import re
 import logging
 
 from certificate_maker.src.exception_types import (
-    AttorneyMissingBarNumber,
-    AttorneyMissingState,
     AttorneyInvalidBarNumber,
-    AttorneyInvalidState
+    AttorneyInvalidState,
 )
 
 
 class Attorney:
     """Class to represent an attorney attending a CLE."""
 
-    def __init__(self, first_name, last_name, email, times, state, bar_number, phone_number):
+    def __init__(
+        self, first_name, last_name, email, times, state, bar_number, phone_number
+    ):
         self.__first_name = first_name
         self.__last_name = last_name
         self.__email = email
@@ -100,18 +99,23 @@ class Attorney:
         """Split the states in the state attribute."""
         checked_state_list = []
         for state in self.__states:
-            if isinstance(state, str) and (state.title().strip() in states_full or state.upper().strip() in states_abbrev):
+            if isinstance(state, str) and (
+                state.title().strip() in states_full
+                or state.upper().strip() in states_abbrev
+            ):
                 checked_state_list.append(state)
             else:
-                logging.info(f"Check State: `{self.name}` may have two states in one spot.")
+                logging.info(
+                    f"Check State: `{self.name}` may have two states in one spot."
+                )
                 if state == "nan":
                     break
-                logging.error(f"Check State: `{self.name}` does not have a valid state listed.")
+                logging.error(
+                    f"Check State: `{self.name}` does not have a valid state listed."
+                )
                 raise AttorneyInvalidState(self.name)
         self.__states = [
-            states_dict[x.upper()]
-            if x.upper() in states_abbrev
-            else x.title().strip()
+            states_dict[x.upper()] if x.upper() in states_abbrev else x.title().strip()
             for x in checked_state_list
         ]
 
@@ -126,7 +130,9 @@ class Attorney:
             elif "-" in number:
                 checked_bar_numbers.append(number.strip())
         if not len(checked_bar_numbers):
-            logging.error(f"Check Bar Number: `{self.name}` does not have a valid bar number listed.")
+            logging.error(
+                f"Check Bar Number: `{self.name}` does not have a valid bar number listed."
+            )
             raise AttorneyInvalidBarNumber(self.name)
         self.bar_numbers = checked_bar_numbers
 

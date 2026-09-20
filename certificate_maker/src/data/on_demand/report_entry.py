@@ -4,23 +4,32 @@ from pandas import Timestamp
 class ReportEntry:
     """Class to represent an an entry on the On-Demand Report."""
 
-    def __init__(self, first_name, last_name, email, state, bar_number, course_title, course_completed_date):
+    def __init__(
+        self,
+        first_name,
+        last_name,
+        email,
+        state,
+        bar_number,
+        course_title,
+        course_completed_date,
+    ):
         # Obtained from the Attendance file
-        self.__first_name : str = first_name
-        self.__last_name : str = last_name
-        self.__email : str = email
-        self.__state : str = state
-        self.__bar_number : str = bar_number
-        self.__course_title : str = course_title
-        self.__course_completed_date : Timestamp = course_completed_date
+        self.__first_name: str = first_name
+        self.__last_name: str = last_name
+        self.__email: str = email
+        self.__state: str = state
+        self.__bar_number: str = bar_number
+        self.__course_title: str = course_title
+        self.__course_completed_date: Timestamp = course_completed_date
 
         # Obtained from the Evaluation file
-        self.__course_evaluation : str | None = None
-        
+        self.__course_evaluation: str | None = None
+
         # Found by comparing the on-demand reference file to the attendance and evaluation files
-        self.__course_id : str | None = None
-        self.__course_hours : str | None = None
-        self.__course_expired : bool = False
+        self.__course_id: str | None = None
+        self.__course_hours: str | None = None
+        self.__course_expired: bool = False
 
     @property
     def name(self):
