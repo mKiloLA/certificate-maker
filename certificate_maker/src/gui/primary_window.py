@@ -16,17 +16,16 @@ class PrimaryWindow(tk.Tk):
         tk.Tk.__init__(self)
         self.__style: ttk.Style = ttk.Style(self)
 
-        self.minsize(width=1200, height=400)
-        self.maxsize(width=1200, height=400)
+        self.minsize(width=700, height=650)
+        self.maxsize(width=700, height=650)
         self.title("Certificate Maker")
 
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=4, minsize=350)
+        self.grid_rowconfigure(1, weight=1, minsize=120)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=2)
 
         self.__side = TerminalPanel(self)
-        self.__side.grid(row=0, column=1, padx=10, pady=10, sticky="NSEW")
+        self.__side.grid(row=1, column=0, padx=10, pady=10, sticky="NSEW")
 
         self.__main = TabPanel(self, self.__side)
         self.__main.grid(row=0, column=0, padx=10, pady=10, sticky="NSEW")
-

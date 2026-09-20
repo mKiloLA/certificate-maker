@@ -118,7 +118,7 @@ def _export_to_excel(report_entries: list[ReportEntry]) -> None:
     from openpyxl.worksheet.table import Table, TableStyleInfo
     
     current_date = datetime.now().strftime("%m%d%Y")
-    path_to_form = os.path.join(os.path.expanduser('~'), f"OnDemand/Output/on_demand_report_{current_date}.xlsx")
+    path_to_form = os.path.join(os.path.expanduser('~'), f"CertificateMaker/OnDemand/on_demand_report_{current_date}.xlsx")
     os.makedirs(os.path.dirname(path_to_form), exist_ok=True)
     
     # Write dataframe to Excel normally (headers at row 1)

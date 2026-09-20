@@ -15,14 +15,15 @@ def create_certificates(zoom_file, webinar_file, create=True):
     date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
     cle_name = webinar.cle_class.cle_name
 
-    desired_filename = os.path.join(os.path.expanduser('~'), f"Certificates/Output/{date_no_delim}, {cle_name.replace(':', '-')}/")
+    desired_filename = os.path.join(os.path.expanduser('~'), f"CertificateMaker/Webinar/{date_no_delim}, {cle_name.replace(':', '-')}/")
     json_filename = os.path.join(desired_filename, f"{date_no_delim}, {cle_name.replace(':', '-')}.json")
 
     if create:
         os.makedirs(desired_filename, exist_ok=True)
 
     serialization_dict = {
-        "desiredpath": desired_filename
+        "desiredpath": desired_filename,
+        "datecreated": date.today().strftime("%m/%d/%Y") + f", by CM",
     }
     attendee_list = []
 
@@ -87,12 +88,13 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 "certifieddate": date.today().strftime("%m/%d/%Y"),
                 "clename": name_1,
                 "overflow": name_2 if len(name_2) > 0 else "",
-                "email": person.email
+                "email": person.email,
+                "phonenumber": person.phone_number
             }
 
             if create:
                 # Write dictionary to pdf form located in users home directory
-                path_to_form = os.path.join(os.path.expanduser('~'), "Certificates/References/certificate_form_empty.pdf")
+                path_to_form = os.path.join(os.path.expanduser('~'), "CertificateMaker/References/certificate_form_empty.pdf")
                 reader = PdfReader(path_to_form)
                 writer = PdfWriter()
                 fields = reader.get_fields()

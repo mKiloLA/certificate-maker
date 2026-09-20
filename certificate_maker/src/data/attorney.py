@@ -14,10 +14,11 @@ from certificate_maker.src.exception_types import (
 class Attorney:
     """Class to represent an attorney attending a CLE."""
 
-    def __init__(self, first_name, last_name, email, times, state, bar_number):
+    def __init__(self, first_name, last_name, email, times, state, bar_number, phone_number):
         self.__first_name = first_name
         self.__last_name = last_name
         self.__email = email
+        self.__phone_number = phone_number
         self.__times = [times]
         self.__states = state
         self.__bar_numbers = bar_number
@@ -50,6 +51,14 @@ class Attorney:
     @email.setter
     def email(self, email):
         self.__email = email
+
+    @property
+    def phone_number(self):
+        return self.__phone_number
+
+    @phone_number.setter
+    def phone_number(self, phone_number):
+        self.__phone_number = phone_number
 
     @property
     def times(self):

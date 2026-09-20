@@ -89,7 +89,8 @@ class Webinar:
                 ],
                 # CHANGE
                 state=[str(attorney["Bar State #1"]).strip(), str(attorney["Bar State #2"]).strip(), str(attorney["Bar State #3"]).strip()],
-                bar_number=[str(attorney["Bar Number #1"]).strip(), str(attorney["Bar Number #2"]).strip(), str(attorney["Bar Number #3"]).strip()]
+                bar_number=[str(attorney["Bar Number #1"]).strip(), str(attorney["Bar Number #2"]).strip(), str(attorney["Bar Number #3"]).strip()],
+                phone_number=attorney["Phone"].strip()
             )
 
             if new_attorney in self.__attendees:
@@ -192,7 +193,6 @@ class Webinar:
         zoom_data.drop(
             columns=[
                 "User Name (Original Name)",
-                "Phone",
                 "Registration Time",
                 "Approval Status",
                 "Time in Session (minutes)",

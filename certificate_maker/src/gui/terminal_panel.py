@@ -19,13 +19,15 @@ class TerminalPanel(tk.Frame):
         """Constructor to initialize the menu panel."""
         self.__master = master
         ttk.Frame.__init__(self, master=self.__master)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         self.terminal = scrolledtext.ScrolledText(
-            self.__master,
+            self,
             wrap=tk.WORD,
             font=("Arial", 14)
         )
-        self.terminal.grid(row=0, column=1, padx=2, pady=2, sticky="NSEW")
+        self.terminal.grid(row=0, column=0, padx=2, pady=2, sticky="NSEW")
         self.terminal.insert(tk.INSERT, "Program Output:\n")
         self.terminal.configure(state ="disabled")
     

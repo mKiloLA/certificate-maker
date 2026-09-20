@@ -9,8 +9,8 @@ This program starts a GUI that takes a Zoom attendence file and master CLE list 
   * Since this app is not signed by an Apple Developer account, step 2 will fail.
 * To bypass this, go into System Settings -> Privacy & Security -> Security and click "Open Anyway" for the CertificateMaker app.
   * This should only be required once, but sometimes you have to do it twice.
-* copy the [Certificates](Certificates) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files.
-* In [Certificates/References](Certificates/References), add your Outlook email address and password to the `Outlook.txt` file.
+* copy the [CertificateMaker](CertificateMaker) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files.
+* In [CertificateMaker/References](CertificateMaker/References), add your Outlook email address and password to the `Outlook.txt` file.
 
 ## Build from Source
 
@@ -55,13 +55,13 @@ Optionally, if you want to create an installer:
 
 ```bash
 brew install create-dmg
-create-dmg --volname "CertificateMaker" --window-size 1200 400 --app-drop-link 450 200 "CertificateMaker.dmg" "dist/CertificateMaker.app"
+create-dmg --volname "CertificateMaker" --window-size 700 650 --app-drop-link 450 200 "CertificateMaker.dmg" "dist/CertificateMaker.app"
 ```
 
 After running the command, there are three more steps:
 
-1. copy the [Certificates](Certificates) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files.
-2. In [Certificates/References](Certificates/References), add your Outlook email address and password to the `Outlook.txt` file.
+1. copy the [CertificateMaker](CertificateMaker) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files.
+2. In [CertificateMaker/References](CertificateMaker/References), add your Outlook email address and password to the `Outlook.txt` file.
 3. Go into the `dist` folder that pyinstaller created and move the `CertificateMaker.app` file to your Applications folder.
 
 The app is now ready to be used. Note that the app is relatively slow to launch. It may seem that it crashes immediately, but it is just loading.
