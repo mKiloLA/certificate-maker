@@ -10,6 +10,7 @@ from tkinter import ttk, filedialog
 from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
 from certificate_maker.src.data.on_demand.on_demand import create_on_demand_report
+from certificate_maker.src.data.state_submission import create_state_submission_report
 from certificate_maker.src.exception_types import *
 
 
@@ -27,8 +28,9 @@ class TabPanel(tk.Frame):
         self.__attend_file = None
         self.__eval_file = None
         self.__on_demand_file = None
+        self.__state_attendance_file = None
         self.__poll_file = None
-        self.__zoom_ce_file = None
+        self.__zoom_survey_file = None
         self.terminal = terminal
 
         self.__loading_tabs: ttk.Notebook = ttk.Notebook(master=self)
@@ -73,7 +75,8 @@ class TabPanel(tk.Frame):
             [
                 ("state_json", "state_json", "Browse for Certificate JSON file", "JSON file"),
                 ("poll", "poll", "Browse for Zoom Poll file", "Zoom Poll file"),
-                ("zoom_ce", "zoom_ce", "Browse for Zoom CE file", "Zoom CE file"),
+                ("zoom_survey", "zoom_survey", "Browse for Zoom Survey file", "Zoom Survey file"),
+                ("state_attendance", "state_attendance", "Browse for Attendance Sheet", "Original Attendance Sheet"),
             ],
             [("Submit Files", "submit-state-submission")],
         )
@@ -272,16 +275,40 @@ class TabPanel(tk.Frame):
             self.__json_file = self.__select_file("state_json", "Browse for Certificate JSON file")
         elif text == "poll":
             self.__poll_file = self.__select_file("poll", "Browse for Zoom Poll file")
-        elif text == "zoom_ce":
-            self.__zoom_ce_file = self.__select_file("zoom_ce", "Browse for Zoom CE file")
+        elif text == "zoom_survey":
+            self.__zoom_survey_file = self.__select_file(
+                "zoom_survey", "Browse for Zoom Survey file"
+            )
+        elif text == "state_attendance":
+            self.__state_attendance_file = self.__select_file(
+                "state_attendance", "Browse for Original Attendance Sheet"
+            )
         elif text == "submit-state-submission":
             required_files = [
                 (self.__json_file, self.__file_labels["state_json"]),
                 (self.__poll_file, self.__file_labels["poll"]),
-                (self.__zoom_ce_file, self.__file_labels["zoom_ce"]),
+                (self.__zoom_survey_file, self.__file_labels["zoom_survey"]),
+                (self.__state_attendance_file, self.__file_labels["state_attendance"]),
             ]
             if all(file_path for file_path, _ in required_files):
-                self.terminal.print_message("State submission files selected and ready for processing.")
+                assert self.__json_file is not None
+                assert self.__poll_file is not None
+                assert self.__zoom_survey_file is not None
+                try:
+                    self.terminal.print_message("State submission report generation started . . .")
+                    output_file = create_state_submission_report(
+                        self.__json_file,
+                        self.__poll_file,
+                        self.__zoom_survey_file,
+                        self.__state_attendance_file,
+                    )
+                    self.terminal.print_message(
+                        f". . . State submission report created: {output_file}"
+                    )
+                except Exception as e:
+                    self.terminal.print_message(
+                        f"Unknown Error: Could not create the state submission report: `{e}`"
+                    )
             else:
                 for file_path, label in required_files:
                     if not file_path:
