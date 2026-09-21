@@ -1,0 +1,14 @@
+{
+    "include": [
+        "certificate_maker"
+    ],
+    "exclude": [
+        "build",
+        ".venv"
+    ],
+    "venvPath": ".",
+    "venv": ".venv",
+    "typeCheckingMode": "basic",
+    "reportMissingImports": "warning",
+    "reportMissingModuleSource": "warning"
+}

@@ -11,3 +11,5 @@ __pycache__
 icon.iconset/
 CertificateMaker.dmg
 icon.png
+.pytest_cache
+testData/

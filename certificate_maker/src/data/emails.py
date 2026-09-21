@@ -10,7 +10,11 @@ from email.mime.text import MIMEText
 
 
 class AttorneyEmail:
-    def __init__(self, name, state, email, clename, cledate):
+    """Email data used to personalize a certificate message."""
+
+    def __init__(
+        self, name: str, state: str, email: str, clename: str, cledate: str
+    ) -> None:
         self.name = name
         self.state = state
         self.email = email
@@ -18,13 +22,14 @@ class AttorneyEmail:
         self.cledate = cledate
 
 
-def send_emails(json_filepath, demo=True):
+def send_emails(json_filepath: str, demo: bool = True) -> None:
+    """Send certificate emails described by a generated JSON file."""
     # Open json file the information
     with open(json_filepath, "r") as openfile:
         webinar_dict = json.load(openfile)
 
     with open(
-        os.path.join(os.path.expanduser("~"), "Certificates/References/Outlook.txt"),
+        os.path.join(os.path.expanduser("~"), "CertificateMaker/References/Outlook.txt"),
         "r",
     ) as reader:
         sender_email = reader.readline().strip()
@@ -83,7 +88,8 @@ def send_emails(json_filepath, demo=True):
             server.sendmail(sender_email, receiver_email, text)
 
 
-def make_body(attorney):
+def make_body(attorney: AttorneyEmail) -> str:
+    """Build the email body for one attorney."""
     bar_statement = ""
     match attorney.state:
         case "Arkansas":

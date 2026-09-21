@@ -17,7 +17,7 @@ from certificate_maker.src.exception_types import (
 class Webinar:
     """Class to define one webinar event."""
 
-    def __init__(self, zoom_path, cle_master_list_path):
+    def __init__(self, zoom_path: str, cle_master_list_path: str) -> None:
         """Initialize webinar event.
 
         Args:
@@ -26,66 +26,66 @@ class Webinar:
             event_date: DateTime, date of the webinar
         """
         self.__attendees = []
-        self.__cle_class: CleClass = None
-        self.__start_time = None
-        self.__breaks = []
+        self.__cle_class: CleClass | None = None
+        self.__start_time: datetime | None = None
+        self.__breaks: list[list[datetime]] = []
 
         self.parse_zoom_data(zoom_path, cle_master_list_path)
 
     @property
-    def attendees(self):
+    def attendees(self) -> list[Attorney]:
         return self.__attendees
 
     @attendees.setter
-    def attendees(self, attendees):
+    def attendees(self, attendees: list[Attorney]) -> None:
         self.__attendees = attendees
 
     @property
-    def cle_class(self):
+    def cle_class(self) -> CleClass | None:
         return self.__cle_class
 
     @cle_class.setter
-    def cle_class(self, cle_class):
+    def cle_class(self, cle_class: CleClass) -> None:
         self.__cle_class = cle_class
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime | None:
         return self.__start_time
 
     @start_time.setter
-    def start_time(self, start_time):
+    def start_time(self, start_time: datetime) -> None:
         self.__start_time = start_time
 
     @property
-    def breaks(self):
+    def breaks(self) -> list[list[datetime]]:
         return self.__breaks
 
     @breaks.setter
-    def start(self, breaks):
+    def breaks(self, breaks: list[list[datetime]]) -> None:
         self.__breaks = breaks
 
-    def add_attendee(self, attorney: Attorney):
+    def add_attendee(self, attorney: Attorney) -> None:
         """Add an attendee to attorney list"""
         self.__attendees.append(attorney)
 
-    def get_attendee(self, attorney):
+    def get_attendee(self, attorney: Attorney) -> Attorney | None:
         """Get an attendee given an attorney."""
         for attendee in self.attendees:
             if attorney == attendee:
                 return attendee
         return None
 
-    def __build_attendence_roster(self, zoom_data: pd.DataFrame):
+    def __build_attendence_roster(self, zoom_data: pd.DataFrame) -> None:
         """Return all attorneys in list."""
         zoom_data = zoom_data.reset_index()
         for _, attorney in zoom_data.iterrows():
             new_attorney = Attorney(
-                first_name=attorney["First Name"].strip(),
-                last_name=attorney["Last Name"].strip(),
-                email=attorney["Email"].strip(),
+                first_name=str(attorney["First Name"]).strip(),
+                last_name=str(attorney["Last Name"]).strip(),
+                email=str(attorney["Email"]).strip(),
                 times=[
-                    string_to_datetime(attorney["Join Time"]),
-                    string_to_datetime(attorney["Leave Time"]),
+                    string_to_datetime(str(attorney["Join Time"])),
+                    string_to_datetime(str(attorney["Leave Time"])),
                 ],
                 # CHANGE
                 state=[
@@ -98,21 +98,22 @@ class Webinar:
                     str(attorney["Bar Number #2"]).strip(),
                     str(attorney["Bar Number #3"]).strip(),
                 ],
-                phone_number=attorney["Phone"].strip(),
+                phone_number=str(attorney["Phone"]).strip(),
             )
 
             if new_attorney in self.__attendees:
                 old_attorney = self.get_attendee(new_attorney)
+                assert old_attorney is not None
                 old_attorney.add_time(
                     [
-                        string_to_datetime(attorney["Join Time"]),
-                        string_to_datetime(attorney["Leave Time"]),
+                        string_to_datetime(str(attorney["Join Time"])),
+                        string_to_datetime(str(attorney["Leave Time"])),
                     ]
                 )
             else:
                 self.add_attendee(new_attorney)
 
-    def parse_zoom_data(self, zoom_file_path, cle_master_list_path):
+    def parse_zoom_data(self, zoom_file_path: str, cle_master_list_path: str) -> None:
         """Take zoom csv file and get attendence information."""
         # Rows to skip to get to first attendee. To be set later
         rows_to_skip = 0
@@ -215,6 +216,8 @@ class Webinar:
         self.__build_attendence_roster(zoom_data)
 
         # for each attendee, calculate their time in class
+        if self.start_time is None:
+            raise MissingStartRow
         for person in self.attendees:
             person.adjust_for_start(self.start_time)
             person.remove_dead_time()
@@ -227,43 +230,30 @@ class Webinar:
             person.parse_states()
 
         # create a CLE object and add approvals
-        self.cle_class = CleClass(cle_name, cle_date)
-        self.cle_class.get_approvals(cle_master_list_path)
+        cle_class = CleClass(cle_name, cle_date)
+        self.cle_class = cle_class
+        cle_class.get_approvals(cle_master_list_path)
 
 
-def string_to_datetime(time):
-    """Given a date as a string, return a datetime object."""
-    try:
-        time = datetime.strptime(time, "%m/%d/%Y %H:%M")
-    except:
+def string_to_datetime(time: str) -> datetime:
+    """Parse a Zoom timestamp using the supported export formats."""
+    formats = (
+        "%m/%d/%Y %H:%M",
+        "%b %d, %Y %I:%M %p",
+        "%b %d, %Y %H:%M",
+        "%m/%d/%Y %H:%M %p",
+        "%m/%d/%Y %I:%M %p",
+        "%m/%d/%y %H:%M %p",
+        "%m/%d/%y %H:%M",
+        "%b %d, %Y %H:%M:%S",
+        "%b %d, %Y %I:%M:%S",
+    )
+    for timestamp_format in formats:
         try:
-            time = datetime.strptime(time, "%b %d, %Y %I:%M %p")
-        except:
-            try:
-                time = datetime.strptime(time, "%b %d, %Y %H:%M")
-            except:
-                try:
-                    time = datetime.strptime(time, "%m/%d/%Y %H:%M %p")
-                except:
-                    try:
-                        time = datetime.strptime(time, "%m/%d/%Y %I:%M %p")
-                    except:
-                        try:
-                            time = datetime.strptime(time, "%m/%d/%y %H:%M %p")
-                        except:
-                            try:
-                                time = datetime.strptime(time, "%m/%d/%y %H:%M")
-                            except:
-                                try:
-                                    time = datetime.strptime(time, "%b %d, %Y %H:%M:%S")
-                                except:
-                                    try:
-                                        time = datetime.strptime(
-                                            time, "%b %d, %Y %I:%M:%S"
-                                        )
-                                    except:
-                                        logging.error(
-                                            f"Failed to parse time information for `{time}`."
-                                        )
-                                        raise IncorrectDateTimeFormat(time)
-    return time.replace(second=0, microsecond=0)
+            return datetime.strptime(time, timestamp_format).replace(
+                second=0, microsecond=0
+            )
+        except ValueError:
+            continue
+    logging.error(f"Failed to parse time information for `{time}`.")
+    raise IncorrectDateTimeFormat(time)

@@ -189,8 +189,7 @@ def _export_to_excel(report_entries: list[ReportEntry]) -> None:
             cell.alignment = Alignment(horizontal="left", vertical="center")
 
     # Remove any existing tables first
-    if hasattr(ws, "_tables"):
-        ws._tables.clear()
+    ws.tables.clear()
 
     # Create table format starting from row 3 (headers) to last row with data
     tab = Table(displayName="OnDemandReport", ref=f"A3:{max_col}{ws.max_row}")
@@ -238,7 +237,7 @@ def _export_to_excel(report_entries: list[ReportEntry]) -> None:
 def create_on_demand_report(
     attendance_file: str, evaluation_file: str, reference_file: str
 ) -> None:
-    """Creates a list of ReportEntry objects from the on-demand report."""
+    """Create and export an on-demand report from three source files."""
     # Read attendance file
     attendance_df: pd.DataFrame = pd.read_csv(attendance_file)
 
@@ -251,7 +250,7 @@ def create_on_demand_report(
         )
 
         # Split course title on last colon and take everything before it
-        course_title: Any = row.get("Chapter Title")
+        course_title: Any = row.get("Chapter Title") or ""
         if course_title and ":" in course_title:
             course_title = course_title.rsplit(":", 1)[0]
 
@@ -268,12 +267,12 @@ def create_on_demand_report(
         # Iterate through each state and bar number pair to create a ReportEntry for each
         for state, bar_number in cro_entries:
             entry: ReportEntry = ReportEntry(
-                first_name=row.get("First Name"),
-                last_name=row.get("Last Name"),
-                email=row.get("Email"),
+                first_name=str(row.get("First Name", "")),
+                last_name=str(row.get("Last Name", "")),
+                email=str(row.get("Email", "")),
                 state=state,
                 bar_number=bar_number,
-                course_title=course_title,
+                course_title=str(course_title),
                 course_completed_date=course_completed_datetime,
             )
             report_entries.append(entry)

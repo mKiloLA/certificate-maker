@@ -7,6 +7,7 @@ Version: 0.1
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog
+from typing import Any
 
 from certificate_maker.src.data.emails import send_emails
 from certificate_maker.src.data.certificate import create_certificates
@@ -43,7 +44,9 @@ from certificate_maker.src.exception_types import (
 class TabPanel(tk.Frame):
     """Class to display loading options."""
 
-    def __init__(self, master, terminal, set_create_tab=False) -> None:
+    def __init__(
+        self, master: Any, terminal: Any, set_create_tab: bool = False
+    ) -> None:
         """Constructor to initialize the menu panel."""
         self.__master = master
         tk.Frame.__init__(self, master=self.__master)
@@ -362,6 +365,9 @@ class TabPanel(tk.Frame):
                 )
         elif text == "test_email":
             try:
+                if self.__json_file is None:
+                    self.terminal.print_message("You must select a JSON file!")
+                    return
                 self.terminal.print_message("Sending test emails . . .")
                 send_emails(self.__json_file, demo=True)
                 self.terminal.print_message(". . . Test emails sent!")
@@ -371,6 +377,9 @@ class TabPanel(tk.Frame):
                 )
         elif text == "submit_email":
             try:
+                if self.__json_file is None:
+                    self.terminal.print_message("You must select a JSON file!")
+                    return
                 self.terminal.print_message("Sending emails . . .")
                 send_emails(self.__json_file, demo=False)
                 self.terminal.print_message(". . . Emails sent!")
@@ -624,7 +633,8 @@ class TabPanel(tk.Frame):
         else:
             pass
 
-    def browse_for_file(self, title):
+    def browse_for_file(self, title: str) -> str:
+        """Open a file picker and return the selected path."""
         return filedialog.askopenfilename(
             title=title,
         )

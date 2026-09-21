@@ -36,11 +36,23 @@
             "problemMatcher": []
         },
         {
+            "label": "Python: Type Check (Pylance)",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "pyright",
+                "certificate_maker"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Python: Quality Check",
             "dependsOrder": "sequence",
             "dependsOn": [
                 "Python: Format Check",
-                "Python: Lint"
+                "Python: Lint",
+                "Python: Type Check (Pylance)"
             ],
             "problemMatcher": []
         }

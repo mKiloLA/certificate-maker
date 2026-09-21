@@ -5,16 +5,17 @@ Version: 0.1
 """
 
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import scrolledtext
+from typing import Any
 
 
 class TerminalPanel(tk.Frame):
     """Class to display loading options."""
 
-    def __init__(self, master) -> None:
+    def __init__(self, master: Any) -> None:
         """Constructor to initialize the menu panel."""
         self.__master = master
-        ttk.Frame.__init__(self, master=self.__master)
+        tk.Frame.__init__(self, master=self.__master)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -25,7 +26,8 @@ class TerminalPanel(tk.Frame):
         self.terminal.insert(tk.INSERT, "Program Output:\n")
         self.terminal.configure(state="disabled")
 
-    def print_message(self, message):
+    def print_message(self, message: str) -> None:
+        """Append a message to the read-only program output area."""
         self.terminal.configure(state="normal")
         self.terminal.insert(tk.INSERT, f"\n{message}\n")
         self.terminal.configure(state="disabled")

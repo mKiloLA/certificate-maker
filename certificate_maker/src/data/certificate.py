@@ -13,11 +13,21 @@ from certificate_maker.src.exception_types import (
 )
 
 
-def create_certificates(zoom_file, webinar_file, create=True):
+def create_certificates(
+    zoom_file: str, webinar_file: str, create: bool = True
+) -> str | None:
+    """Create certificates and serialize attendee data to JSON.
+
+    When ``create`` is false, the input files are validated without writing
+    certificates or a JSON output file.
+    """
     # Create a webinar object using the provided files
     webinar = Webinar(zoom_file, webinar_file)
-    date_no_delim = webinar.cle_class.cle_date.strftime("%m%d%Y")
-    cle_name = webinar.cle_class.cle_name
+    if webinar.cle_class is None:
+        raise RuntimeError("Webinar class data was not loaded.")
+    cle_class = webinar.cle_class
+    date_no_delim = cle_class.cle_date.strftime("%m%d%Y")
+    cle_name = cle_class.cle_name
 
     desired_filename = os.path.join(
         os.path.expanduser("~"),
@@ -47,7 +57,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
         for index, state in enumerate(person.states):
             # Check if the class is approved in that state, if not throw error
             try:
-                approval_information = webinar.cle_class.approvals[state]
+                approval_information = cle_class.approvals[state]
             except:
                 logging.error(
                     f"Check State Approvals: `{person.name}` has no approval infomation in the state of `{state}`."
@@ -55,7 +65,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 raise MissingStateApproval((person.name, state))
 
             # Split the class name by spaces and then check lengths. This is to prevent overflow on pdf
-            og_name_list = webinar.cle_class.cle_name.split(" ")
+            og_name_list = cle_class.cle_name.split(" ")
             first_name_list = []
             overflow_name_list = []
             total_length = 0
@@ -91,7 +101,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
                 "state": state,
                 "barnumber": f"#{person.bar_numbers[index]}",
                 "attendedhours": f"{rounded_hours if rounded_hours < total_approved_time else total_approved_time:.2f}",
-                "cledate": webinar.cle_class.cle_date.strftime("%B %d, %Y"),
+                "cledate": cle_class.cle_date.strftime("%B %d, %Y"),
                 "totalhours": approval_information[1],
                 "coursenumber": f"#{approval_information[0]}",
                 "approvalstate": state,
@@ -141,7 +151,7 @@ def create_certificates(zoom_file, webinar_file, create=True):
         return json_filename
 
 
-def round_hours(total_time, state):
+def round_hours(total_time: Any, state: str) -> str:
     """Round the attended hours according to state guidelines."""
     seconds = total_time.total_seconds()
     if state in ["Missouri"]:
