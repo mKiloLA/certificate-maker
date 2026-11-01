@@ -92,7 +92,6 @@ def create_certificates(
 
             if create:
                 course_title = "\n".join(filter(None, (name_1, name_2, name_3)))
-                course_title = f"“{course_title}”"
                 hours_text = (
                     f"for {attended_hours:.2f} hours"
                     if approved
@@ -110,13 +109,17 @@ def create_certificates(
                     ),
                     "course_title": course_title,
                     "approved_jurisdiction": _approval_summary(cle_class.approvals),
-                    "certified_date": certificate_data["certifieddate"],
+                    "certification_block": (
+                        "This information is certified by Wendi Oster, VP of\n"
+                        f"Operations, Comedian of Law, LLC on {certificate_data['certifieddate']}.\n"
+                        "Please reach out with any questions."
+                    ),
                 }
 
                 # Write dictionary to pdf form located in users home directory
                 path_to_form = os.path.join(
                     os.path.expanduser("~"),
-                    f"CertificateMaker/References/certificate_form.pdf",
+                    "CertificateMaker/References/certificate_form.pdf",
                 )
                 reader = PdfReader(path_to_form)
                 writer = PdfWriter()
