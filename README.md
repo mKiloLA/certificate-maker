@@ -2,6 +2,8 @@
 
 This program starts a GUI that takes a Zoom attendence file and master CLE list and outputs certificates of attendence.
 
+Each file input tile accepts one file at a time. Drop a file in its highlighted drop area, or use its browse button. Selected tiles show the file name, type, and size.
+
 ## Installation (macOS)
 
 * Download the latest release from the [releases tab](https://github.com/mKiloLA/certificate-maker/releases).

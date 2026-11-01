@@ -9,3 +9,4 @@ pyflakes
 pyright
 pyinstaller
 certifi
+tkinterdnd2
