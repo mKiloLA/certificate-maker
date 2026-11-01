@@ -13,13 +13,20 @@ class AttorneyEmail:
     """Email data used to personalize a certificate message."""
 
     def __init__(
-        self, name: str, state: str, email: str, clename: str, cledate: str
+        self,
+        name: str,
+        state: str,
+        email: str,
+        clename: str,
+        cledate: str,
+        approved: bool = True,
     ) -> None:
         self.name = name
         self.state = state
         self.email = email
         self.clename = clename
         self.cledate = cledate
+        self.approved = approved
 
 
 def send_emails(json_filepath: str, demo: bool = True) -> None:
@@ -49,6 +56,7 @@ def send_emails(json_filepath: str, demo: bool = True) -> None:
                 email=attendee["email"],
                 clename=f"{attendee['clename']} {attendee['overflow']}",
                 cledate=attendee["cledate"],
+                approved=attendee.get("approved") is not False,
             )
 
             body = make_body(person)
@@ -132,12 +140,16 @@ def make_body(attorney: AttorneyEmail) -> str:
             bar_statement = ""
         case _:
             bar_statement = ""
+    unapproved_statement = "This webinar has not been submitted for approval in your state, so please contact your local bar association/CLE commission for information on how to request credit for this class. If they request any additional information in order to consider credit, please contact me and I will be happy to provide you with the information they request."
+    attendance_statement = (
+        bar_statement if attorney.approved else unapproved_statement
+    )
     body = f"""
 {attorney.name},
 
 Thank you for attending our recent webinar, we do hope you enjoyed it.
 
-I have attached a COL certificate of attendance to this email, which you can keep for your records. {bar_statement}
+I have attached a COL certificate of attendance to this email, which you can keep for your records. {attendance_statement}
 
 If you have any questions or concerns, please let me know. Thank you and have a great day!!
 
@@ -145,9 +157,9 @@ Sincerely,
 Wendi M. Oster
 Comedian of Law LLC
 Vice President of Operations
-22052 W. 66th St., #192
-Shawnee, KS 66226
-913-213-9823 – office
+23 Medford Drive
+Palm Coast, FL 32137-2505
+913-213-9823 - office
 info@comedianoflaw.com
 www.comedianoflaw.com
 Facebook:  https://www.facebook.com/comedianoflaw/

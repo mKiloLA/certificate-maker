@@ -9,7 +9,7 @@ This program starts a GUI that takes a Zoom attendence file and master CLE list 
   * Since this app is not signed by an Apple Developer account, step 2 will fail.
 * To bypass this, go into System Settings -> Privacy & Security -> Security and click "Open Anyway" for the CertificateMaker app.
   * This should only be required once, but sometimes you have to do it twice.
-* copy the [CertificateMaker](CertificateMaker) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files.
+* copy the [CertificateMaker](CertificateMaker) file to your home directory. This is where the application will find the certificate template, output the new certificates, and write log files. The `References` folder must include `certificate_form.pdf`.
 * In [CertificateMaker/References](CertificateMaker/References), add your Outlook email address and password to the `Outlook.txt` file.
 
 ## Build from Source
